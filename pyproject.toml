@@ -1,0 +1,81 @@
+[tool.poetry]
+name = "horizon"
+version = "0.1.0"
+description = "Foundation for the Project Horizon connected-asset intelligence platform."
+authors = ["Code Synergy <engineering@codesynergy.local>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+  { include = "horizon_events", from = "packages/horizon-events/src" },
+  { include = "horizon_kernel", from = "packages/horizon-kernel/src" },
+  { include = "horizon_api", from = "services/api/src" },
+  { include = "domain", from = "packages/kernel" },
+  { include = "shared", from = "packages" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.13,<4.0"
+fastapi = "^0.115.0"
+pydantic = "^2.8.0"
+pydantic-settings = "^2.4.0"
+uvicorn = { extras = ["standard"], version = "^0.30.0" }
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+coverage = "^7.6.0"
+mypy = "^1.11.0"
+pre-commit = "^3.8.0"
+pytest = "^8.3.0"
+pytest-cov = "^5.0.0"
+ruff = "^0.6.0"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py313"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["services/api/src", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unused_configs = true
+files = [
+  "services/api/src",
+  "packages/horizon-events/src",
+  "packages/horizon-events/tests",
+  "packages/horizon-kernel/src",
+  "packages/horizon-kernel/tests",
+  "packages",
+  "tests"
+]
+mypy_path = [
+  "services/api/src",
+  "packages/horizon-events/src",
+  "packages/horizon-kernel/src",
+  "packages/kernel",
+  "packages"
+]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+testpaths = ["tests", "services/api/tests", "packages/horizon-events/tests", "packages/horizon-kernel/tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["horizon_api", "horizon_events", "horizon_kernel", "domain", "shared"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 95

@@ -1,0 +1,1 @@
+"""Value object boundary package."""

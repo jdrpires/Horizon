@@ -1,0 +1,24 @@
+name: Discussion
+description: Open an engineering or product discussion.
+title: "discussion: "
+labels: ["discussion"]
+body:
+  - type: textarea
+    id: topic
+    attributes:
+      label: Topic
+      description: Describe the discussion topic.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Add background, constraints, and references.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired Outcome
+      description: Describe the clarity or decision needed.

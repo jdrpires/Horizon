@@ -1,0 +1,20 @@
+title: "Discussion: "
+labels: ["discussion"]
+body:
+  - type: textarea
+    id: topic
+    attributes:
+      label: Topic
+      description: Describe the topic or question.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Add background, constraints, and links.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired Outcome
+      description: Describe the decision, clarity, or next step you are seeking.

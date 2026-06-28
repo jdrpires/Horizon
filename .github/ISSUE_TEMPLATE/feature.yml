@@ -1,0 +1,31 @@
+name: Feature
+description: Propose a scoped product or platform capability.
+title: "feat: "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the problem this feature should solve.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired Outcome
+      description: Describe the user or platform outcome.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Describe what is included and excluded.
+    validations:
+      required: true
+  - type: input
+    id: rfc
+    attributes:
+      label: RFC
+      description: Link the RFC when one exists.

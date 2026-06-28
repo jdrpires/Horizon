@@ -1,0 +1,8 @@
+* @code-synergy/engineering
+
+/docs/ @code-synergy/architecture
+/rfcs/ @code-synergy/architecture
+/adrs/ @code-synergy/architecture
+/services/api/ @code-synergy/platform
+/packages/kernel/ @code-synergy/platform
+/infra/ @code-synergy/platform

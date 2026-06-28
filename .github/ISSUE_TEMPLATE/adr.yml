@@ -1,0 +1,26 @@
+name: ADR
+description: Request or track an Architecture Decision Record.
+title: "adr: "
+labels: ["adr"]
+body:
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+      description: Describe the architectural decision to record.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Describe the forces and constraints behind the decision.
+    validations:
+      required: true
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequences
+      description: Describe expected tradeoffs and follow-up obligations.
+    validations:
+      required: true

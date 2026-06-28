@@ -1,0 +1,31 @@
+name: RFC
+description: Request or track a Request for Comments.
+title: "rfc: "
+labels: ["rfc"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain why an RFC is needed.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Summarize the proposed direction.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: List meaningful alternatives considered.
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Describe expected product, architecture, and operational impact.
+    validations:
+      required: true
