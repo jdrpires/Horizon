@@ -50,6 +50,38 @@ The use case:
 5. Publishes envelopes through the in-memory Event Bus.
 6. Returns a DTO containing the aggregate and produced envelopes.
 
+## Register Observation Use Case
+
+Sprint-007 extends the in-memory application layer with `RegisterObservationCommand`.
+
+The use case:
+
+1. Receives an Asset ID and observation data from the playground.
+2. Confirms the Asset exists in the in-memory Asset repository.
+3. Maps input to Observation domain value objects.
+4. Calls `Observation.register`.
+5. Saves the Observation in an in-memory repository.
+6. Maps produced Domain Events to Event Envelopes.
+7. Publishes envelopes through the in-memory Event Bus.
+8. Returns a DTO containing the Observation and produced envelopes.
+
+```mermaid
+flowchart TD
+    P["Playground"] --> C["RegisterObservationCommand"]
+    C --> M["Mediator"]
+    M --> D["Command Dispatcher"]
+    D --> VP["Validation Pipeline"]
+    VP --> LP["Logging Pipeline"]
+    LP --> H["RegisterObservationCommandHandler"]
+    H --> U["RegisterObservationUseCase"]
+    U --> R["Asset Repository"]
+    R --> O["Observation Aggregate"]
+    O --> E["ObservationRegistered Domain Event"]
+    E --> X["EventEnvelope"]
+    X --> B["InMemoryEventBus"]
+    B --> Console["Console Subscriber"]
+```
+
 ## Playground
 
 `apps/playground/main.py` provides a terminal menu:
@@ -57,9 +89,12 @@ The use case:
 ```text
 ===================================
 HORIZON PLAYGROUND
-1 - Register Asset
-2 - List Assets
-3 - Exit
+1 Register Asset
+2 Register Observation
+3 List Assets
+4 List Observations
+5 Show Domain Events
+6 Exit
 ===================================
 ```
 

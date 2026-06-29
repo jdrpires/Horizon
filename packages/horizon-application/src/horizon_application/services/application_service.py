@@ -2,15 +2,29 @@
 
 from __future__ import annotations
 
-from horizon_application.commands import RegisterAssetCommand
-from horizon_application.dto import AssetDTO, RegisterAssetResultDTO
-from horizon_application.handlers import ListAssetsQueryHandler, RegisterAssetCommandHandler
+from horizon_application.commands import RegisterAssetCommand, RegisterObservationCommand
+from horizon_application.dto import (
+    AssetDTO,
+    ObservationDTO,
+    RegisterAssetResultDTO,
+    RegisterObservationResultDTO,
+)
+from horizon_application.handlers import (
+    ListAssetsQueryHandler,
+    ListObservationsQueryHandler,
+    RegisterAssetCommandHandler,
+    RegisterObservationCommandHandler,
+)
 from horizon_application.mediator import CommandDispatcher, Mediator, QueryDispatcher
 from horizon_application.pipelines import LoggingPipeline, Pipeline, ValidationPipeline
-from horizon_application.queries import ListAssetsQuery
+from horizon_application.queries import ListAssetsQuery, ListObservationsQuery
 from horizon_application.services.event_mapping import DomainEventEnvelopeMapper
-from horizon_application.services.in_memory import InMemoryAssetRepository, InMemoryUnitOfWork
-from horizon_application.use_cases import RegisterAssetUseCase
+from horizon_application.services.in_memory import (
+    InMemoryAssetRepository,
+    InMemoryObservationRepository,
+    InMemoryUnitOfWork,
+)
+from horizon_application.use_cases import RegisterAssetUseCase, RegisterObservationUseCase
 from horizon_events import EventSubscriber, InMemoryEventBus
 from horizon_kernel import Clock
 
@@ -22,6 +36,7 @@ class ApplicationService:
         self,
         *,
         repository: InMemoryAssetRepository,
+        observation_repository: InMemoryObservationRepository,
         unit_of_work: InMemoryUnitOfWork,
         event_bus: InMemoryEventBus,
         mediator: Mediator,
@@ -29,6 +44,7 @@ class ApplicationService:
     ) -> None:
         """Create the service."""
         self.repository = repository
+        self.observation_repository = observation_repository
         self.unit_of_work = unit_of_work
         self.event_bus = event_bus
         self.mediator = mediator
@@ -43,6 +59,7 @@ class ApplicationService:
     ) -> ApplicationService:
         """Create a fully wired in-memory application service."""
         repository = InMemoryAssetRepository()
+        observation_repository = InMemoryObservationRepository()
         unit_of_work = InMemoryUnitOfWork()
         event_bus = InMemoryEventBus()
         for subscriber in event_subscribers:
@@ -61,14 +78,31 @@ class ApplicationService:
             event_mapper=DomainEventEnvelopeMapper(source="asset.register"),
             clock=clock,
         )
+        register_observation_use_case = RegisterObservationUseCase(
+            asset_repository=repository,
+            observation_repository=observation_repository,
+            unit_of_work=unit_of_work,
+            event_bus=event_bus,
+            event_mapper=DomainEventEnvelopeMapper(source="observation.register"),
+            clock=clock,
+        )
         command_dispatcher.register(
             RegisterAssetCommand,
             RegisterAssetCommandHandler(register_asset_use_case),
         )
+        command_dispatcher.register(
+            RegisterObservationCommand,
+            RegisterObservationCommandHandler(register_observation_use_case),
+        )
         query_dispatcher.register(ListAssetsQuery, ListAssetsQueryHandler(repository))
+        query_dispatcher.register(
+            ListObservationsQuery,
+            ListObservationsQueryHandler(observation_repository),
+        )
 
         return cls(
             repository=repository,
+            observation_repository=observation_repository,
             unit_of_work=unit_of_work,
             event_bus=event_bus,
             mediator=mediator,
@@ -82,3 +116,14 @@ class ApplicationService:
     def list_assets(self) -> tuple[AssetDTO, ...]:
         """List registered Assets."""
         return self.mediator.ask(ListAssetsQuery())  # type: ignore[return-value]
+
+    def register_observation(
+        self,
+        command: RegisterObservationCommand,
+    ) -> RegisterObservationResultDTO:
+        """Register an Observation."""
+        return self.mediator.send(command)  # type: ignore[return-value]
+
+    def list_observations(self) -> tuple[ObservationDTO, ...]:
+        """List registered Observations."""
+        return self.mediator.ask(ListObservationsQuery())  # type: ignore[return-value]

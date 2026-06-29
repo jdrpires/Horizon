@@ -1,5 +1,15 @@
 """Application handlers."""
 
-from horizon_application.handlers.asset import ListAssetsQueryHandler, RegisterAssetCommandHandler
+from horizon_application.handlers.asset import (
+    ListAssetsQueryHandler,
+    ListObservationsQueryHandler,
+    RegisterAssetCommandHandler,
+    RegisterObservationCommandHandler,
+)
 
-__all__ = ["ListAssetsQueryHandler", "RegisterAssetCommandHandler"]
+__all__ = [
+    "ListAssetsQueryHandler",
+    "ListObservationsQueryHandler",
+    "RegisterAssetCommandHandler",
+    "RegisterObservationCommandHandler",
+]
