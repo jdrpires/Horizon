@@ -32,7 +32,7 @@ class DomainEventEnvelopeMapper:
             correlation_id=event.correlation_id.to_string(),
             causation_id=event.causation_id.to_string(),
             occurred_at=event.occurred_at,
-            tags={"domain": "asset"},
+            tags={"domain": _domain_tag(event_name)},
         )
         return EventEnvelope.create(
             event_name=event_name,
@@ -46,3 +46,12 @@ class DomainEventEnvelopeMapper:
     def map_all(self, events: tuple[DomainEvent, ...]) -> tuple[EventEnvelope, ...]:
         """Map many Domain Events to Event Envelopes."""
         return tuple(self.map(event) for event in events)
+
+
+def _domain_tag(event_name: str) -> str:
+    """Return a domain tag from the event name."""
+    if event_name.startswith("Observation"):
+        return "observation"
+    if event_name.startswith("Asset"):
+        return "asset"
+    return "unknown"

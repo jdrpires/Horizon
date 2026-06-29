@@ -21,6 +21,18 @@ from horizon_domain.asset import (
     TransferOwnership,
     UpdateConfiguration,
 )
+from horizon_domain.observation import (
+    Observation,
+    ObservationId,
+    ObservationQuality,
+    ObservationRegistered,
+    ObservationSource,
+    ObservationTimestamp,
+    ObservationType,
+    ObservationUnit,
+    ObservationValue,
+    RegisterObservation,
+)
 
 __all__ = [
     "ActivateAsset",
@@ -39,7 +51,17 @@ __all__ = [
     "AssetTransferred",
     "DeactivateAsset",
     "Ownership",
+    "Observation",
+    "ObservationId",
+    "ObservationQuality",
+    "ObservationRegistered",
+    "ObservationSource",
+    "ObservationTimestamp",
+    "ObservationType",
+    "ObservationUnit",
+    "ObservationValue",
     "RegisterAsset",
+    "RegisterObservation",
     "TransferOwnership",
     "UpdateConfiguration",
 ]
