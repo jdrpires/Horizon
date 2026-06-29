@@ -9,6 +9,7 @@ packages = [
   { include = "horizon_events", from = "packages/horizon-events/src" },
   { include = "horizon_kernel", from = "packages/horizon-kernel/src" },
   { include = "horizon_domain", from = "packages/horizon-domain/src" },
+  { include = "horizon_application", from = "packages/horizon-application/src" },
   { include = "horizon_api", from = "services/api/src" },
   { include = "domain", from = "packages/kernel" },
   { include = "shared", from = "packages" }
@@ -41,7 +42,7 @@ target-version = ["py313"]
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-src = ["services/api/src", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages/horizon-domain/src", "packages", "tests"]
+src = ["services/api/src", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages/horizon-domain/src", "packages/horizon-application/src", "packages", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
@@ -59,6 +60,8 @@ files = [
   "packages/horizon-kernel/tests",
   "packages/horizon-domain/src",
   "packages/horizon-domain/tests",
+  "packages/horizon-application/src",
+  "packages/horizon-application/tests",
   "packages",
   "tests"
 ]
@@ -67,17 +70,18 @@ mypy_path = [
   "packages/horizon-events/src",
   "packages/horizon-kernel/src",
   "packages/horizon-domain/src",
+  "packages/horizon-application/src",
   "packages/kernel",
   "packages"
 ]
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers"
-testpaths = ["tests", "services/api/tests", "packages/horizon-events/tests", "packages/horizon-kernel/tests", "packages/horizon-domain/tests"]
+testpaths = ["tests", "services/api/tests", "packages/horizon-events/tests", "packages/horizon-kernel/tests", "packages/horizon-domain/tests", "packages/horizon-application/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["horizon_api", "horizon_events", "horizon_kernel", "horizon_domain", "domain", "shared"]
+source = ["horizon_api", "horizon_events", "horizon_kernel", "horizon_domain", "horizon_application", "domain", "shared"]
 
 [tool.coverage.report]
 show_missing = true
