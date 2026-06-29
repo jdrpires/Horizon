@@ -117,6 +117,7 @@ make coverage
 ## Documentation
 
 - [Engineering Playbook](docs/ENGINEERING_PLAYBOOK.md)
+- [Project Memory](docs/PROJECT_MEMORY.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Product Vision](docs/PRODUCT_VISION.md)
 - [RFC Index](rfcs/README.md)
