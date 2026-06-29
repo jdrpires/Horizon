@@ -19,6 +19,7 @@ from horizon_domain.observation import (
     ObservationValue,
     RegisterObservation,
 )
+from horizon_domain.timeline import TimelineRepository
 from horizon_events import InMemoryEventBus
 from horizon_kernel import Clock
 
@@ -34,6 +35,7 @@ class RegisterObservationUseCase:
         unit_of_work: UnitOfWork,
         event_bus: InMemoryEventBus,
         event_mapper: DomainEventEnvelopeMapper,
+        timeline_repository: TimelineRepository | None = None,
         clock: Clock | None = None,
     ) -> None:
         """Create the use case."""
@@ -42,6 +44,7 @@ class RegisterObservationUseCase:
         self._unit_of_work = unit_of_work
         self._event_bus = event_bus
         self._event_mapper = event_mapper
+        self._timeline_repository = timeline_repository
         self._clock = clock
 
     def execute(self, request: RegisterObservationCommand) -> RegisterObservationResultDTO:
@@ -63,6 +66,8 @@ class RegisterObservationUseCase:
                 self._clock,
             )
             self._observation_repository.save(observation)
+            if self._timeline_repository is not None:
+                self._timeline_repository.append_observation(observation)
             envelopes = self._event_mapper.map_all(observation.pull_events())
             self._event_bus.publish_many(envelopes)
             self._unit_of_work.commit()

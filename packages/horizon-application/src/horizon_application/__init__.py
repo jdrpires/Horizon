@@ -24,6 +24,14 @@ from horizon_application.services.in_memory import (
     InMemoryObservationRepository,
     InMemoryUnitOfWork,
 )
+from horizon_application.timeline import (
+    GetTimelineQuery,
+    InMemoryTimelineRepository,
+    ReplayTimelineQuery,
+    ReplayTimelineResultDTO,
+    TimelineEntryDTO,
+    TimelineResultDTO,
+)
 from horizon_application.shared import ApplicationResult
 from horizon_application.use_cases import RegisterAssetUseCase, RegisterObservationUseCase, UseCase
 
@@ -36,7 +44,9 @@ __all__ = [
     "EventEnvelopeDTO",
     "InMemoryAssetRepository",
     "InMemoryObservationRepository",
+    "InMemoryTimelineRepository",
     "InMemoryUnitOfWork",
+    "GetTimelineQuery",
     "ListAssetsQuery",
     "ListAssetsQueryHandler",
     "ListObservationsQuery",
@@ -53,7 +63,11 @@ __all__ = [
     "RegisterObservationCommandHandler",
     "RegisterObservationResultDTO",
     "RegisterObservationUseCase",
+    "ReplayTimelineQuery",
+    "ReplayTimelineResultDTO",
     "RegisterAssetUseCase",
+    "TimelineEntryDTO",
+    "TimelineResultDTO",
     "UseCase",
     "ValidationPipeline",
 ]

@@ -12,7 +12,7 @@ It must not depend on FastAPI, databases, Redis, Docker, HTTP, ORM tools, Collec
 
 ```mermaid
 flowchart TD
-    P["Playground"] --> C["RegisterAssetCommand"]
+    P["Horizon Lab"] --> C["RegisterAssetCommand"]
     C --> M["Mediator"]
     M --> D["Command Dispatcher"]
     D --> VP["Validation Pipeline"]
@@ -56,7 +56,7 @@ Sprint-007 extends the in-memory application layer with `RegisterObservationComm
 
 The use case:
 
-1. Receives an Asset ID and observation data from the playground.
+1. Receives an Asset ID and observation data from Horizon Lab.
 2. Confirms the Asset exists in the in-memory Asset repository.
 3. Maps input to Observation domain value objects.
 4. Calls `Observation.register`.
@@ -67,7 +67,7 @@ The use case:
 
 ```mermaid
 flowchart TD
-    P["Playground"] --> C["RegisterObservationCommand"]
+    P["Horizon Lab"] --> C["RegisterObservationCommand"]
     C --> M["Mediator"]
     M --> D["Command Dispatcher"]
     D --> VP["Validation Pipeline"]
@@ -82,20 +82,20 @@ flowchart TD
     B --> Console["Console Subscriber"]
 ```
 
-## Playground
+## Horizon Lab
 
-`apps/playground/main.py` provides a terminal menu:
+`apps/horizon-lab/main.py` provides a terminal menu:
 
 ```text
 ===================================
-HORIZON PLAYGROUND
+HORIZON LAB
 1 Register Asset
 2 Register Observation
-3 List Assets
-4 List Observations
-5 Show Domain Events
+3 Show Timeline
+4 Replay Timeline
+5 List Events
 6 Exit
 ===================================
 ```
 
-The playground is an in-memory adapter for local exploration only.
+Horizon Lab supersedes the earlier local playground name. It remains an in-memory adapter for local exploration only.

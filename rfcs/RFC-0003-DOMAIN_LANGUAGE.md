@@ -1,6 +1,8 @@
 # RFC-0003: Domain Language
 
-Status: Accepted
+Status: Superseded
+
+Superseded By: RFC-0004-DOMAIN_LANGUAGE.md
 
 ## Summary
 
