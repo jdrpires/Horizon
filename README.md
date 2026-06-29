@@ -47,6 +47,12 @@ make lint
 make test
 ```
 
+Run the in-memory Horizon Lab:
+
+```bash
+python apps/horizon-lab/main.py
+```
+
 Run the API service locally:
 
 ```bash
@@ -64,6 +70,7 @@ make docker
 ```text
 apps/
   collector-android/
+  horizon-lab/
   web-console/
 services/
   api/

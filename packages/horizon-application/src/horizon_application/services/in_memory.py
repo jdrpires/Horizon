@@ -7,7 +7,7 @@ from horizon_domain.observation import ObservationId
 
 
 class InMemoryAssetRepository:
-    """In-memory Asset repository for playground and tests."""
+    """In-memory Asset repository for Horizon Lab and tests."""
 
     def __init__(self) -> None:
         """Create an empty repository."""
@@ -47,7 +47,7 @@ class InMemoryUnitOfWork:
 
 
 class InMemoryObservationRepository:
-    """In-memory Observation repository for playground and tests."""
+    """In-memory Observation repository for Horizon Lab and tests."""
 
     def __init__(self) -> None:
         """Create an empty repository."""

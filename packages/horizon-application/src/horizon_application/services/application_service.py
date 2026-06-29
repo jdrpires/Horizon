@@ -24,7 +24,17 @@ from horizon_application.services.in_memory import (
     InMemoryObservationRepository,
     InMemoryUnitOfWork,
 )
+from horizon_application.timeline import (
+    GetTimelineQuery,
+    InMemoryTimelineRepository,
+    ReplayTimelineQuery,
+    ReplayTimelineResultDTO,
+    TimelineResultDTO,
+)
+from horizon_application.timeline.handlers import GetTimelineQueryHandler, ReplayTimelineQueryHandler
+from horizon_application.timeline.use_cases import GetTimelineUseCase, ReplayTimelineUseCase
 from horizon_application.use_cases import RegisterAssetUseCase, RegisterObservationUseCase
+from horizon_domain.timeline import ReplayEngine
 from horizon_events import EventSubscriber, InMemoryEventBus
 from horizon_kernel import Clock
 
@@ -37,6 +47,7 @@ class ApplicationService:
         *,
         repository: InMemoryAssetRepository,
         observation_repository: InMemoryObservationRepository,
+        timeline_repository: InMemoryTimelineRepository,
         unit_of_work: InMemoryUnitOfWork,
         event_bus: InMemoryEventBus,
         mediator: Mediator,
@@ -45,6 +56,7 @@ class ApplicationService:
         """Create the service."""
         self.repository = repository
         self.observation_repository = observation_repository
+        self.timeline_repository = timeline_repository
         self.unit_of_work = unit_of_work
         self.event_bus = event_bus
         self.mediator = mediator
@@ -60,6 +72,7 @@ class ApplicationService:
         """Create a fully wired in-memory application service."""
         repository = InMemoryAssetRepository()
         observation_repository = InMemoryObservationRepository()
+        timeline_repository = InMemoryTimelineRepository()
         unit_of_work = InMemoryUnitOfWork()
         event_bus = InMemoryEventBus()
         for subscriber in event_subscribers:
@@ -84,8 +97,11 @@ class ApplicationService:
             unit_of_work=unit_of_work,
             event_bus=event_bus,
             event_mapper=DomainEventEnvelopeMapper(source="observation.register"),
+            timeline_repository=timeline_repository,
             clock=clock,
         )
+        get_timeline_use_case = GetTimelineUseCase(timeline_repository)
+        replay_timeline_use_case = ReplayTimelineUseCase(timeline_repository, ReplayEngine())
         command_dispatcher.register(
             RegisterAssetCommand,
             RegisterAssetCommandHandler(register_asset_use_case),
@@ -99,10 +115,19 @@ class ApplicationService:
             ListObservationsQuery,
             ListObservationsQueryHandler(observation_repository),
         )
+        query_dispatcher.register(
+            GetTimelineQuery,
+            GetTimelineQueryHandler(get_timeline_use_case),
+        )
+        query_dispatcher.register(
+            ReplayTimelineQuery,
+            ReplayTimelineQueryHandler(replay_timeline_use_case),
+        )
 
         return cls(
             repository=repository,
             observation_repository=observation_repository,
+            timeline_repository=timeline_repository,
             unit_of_work=unit_of_work,
             event_bus=event_bus,
             mediator=mediator,
@@ -127,3 +152,14 @@ class ApplicationService:
     def list_observations(self) -> tuple[ObservationDTO, ...]:
         """List registered Observations."""
         return self.mediator.ask(ListObservationsQuery())  # type: ignore[return-value]
+
+    def show_timeline(self, query: GetTimelineQuery | None = None) -> TimelineResultDTO:
+        """Return Timeline entries."""
+        return self.mediator.ask(query or GetTimelineQuery())  # type: ignore[return-value]
+
+    def replay_timeline(
+        self,
+        query: ReplayTimelineQuery | None = None,
+    ) -> ReplayTimelineResultDTO:
+        """Replay Timeline entries."""
+        return self.mediator.ask(query or ReplayTimelineQuery())  # type: ignore[return-value]

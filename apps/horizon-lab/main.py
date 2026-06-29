@@ -1,4 +1,4 @@
-"""Horizon in-memory playground."""
+"""Horizon in-memory lab."""
 
 from __future__ import annotations
 
@@ -17,17 +17,19 @@ for source_path in (
 
 from horizon_application import (  # noqa: E402
     ApplicationService,
+    GetTimelineQuery,
     RegisterAssetCommand,
     RegisterObservationCommand,
+    ReplayTimelineQuery,
 )
 from horizon_events import EventEnvelope, EventSubscriber  # noqa: E402
 
 
 def main() -> None:
-    """Run the terminal playground."""
+    """Run the terminal Horizon Lab."""
     seen_events: list[EventEnvelope] = []
     service = ApplicationService.create_in_memory(event_subscribers=(_console_subscriber(),))
-    service.event_bus.subscribe(EventSubscriber(name="playground-memory", handler=seen_events.append))
+    service.event_bus.subscribe(EventSubscriber(name="horizon-lab-memory", handler=seen_events.append))
     while True:
         print_menu()
         option = input("Select an option: ").strip()
@@ -36,9 +38,9 @@ def main() -> None:
         elif option == "2":
             register_observation(service)
         elif option == "3":
-            list_assets(service)
+            show_timeline(service)
         elif option == "4":
-            list_observations(service)
+            replay_timeline(service)
         elif option == "5":
             show_domain_events(seen_events)
         elif option == "6":
@@ -49,14 +51,14 @@ def main() -> None:
 
 
 def print_menu() -> None:
-    """Print the playground menu."""
+    """Print the Horizon Lab menu."""
     print("====================================")
-    print("HORIZON PLAYGROUND")
+    print("HORIZON LAB")
     print("1 Register Asset")
     print("2 Register Observation")
-    print("3 List Assets")
-    print("4 List Observations")
-    print("5 Show Domain Events")
+    print("3 Show Timeline")
+    print("4 Replay Timeline")
+    print("5 List Events")
     print("6 Exit")
     print("====================================")
 
@@ -78,16 +80,6 @@ def register_asset(service: ApplicationService) -> None:
     print("Event Envelopes:")
     for event in result.events:
         print(json.dumps(event.data, indent=2, sort_keys=True))
-
-
-def list_assets(service: ApplicationService) -> None:
-    """Print registered Assets."""
-    assets = service.list_assets()
-    if not assets:
-        print("No Assets registered.")
-        return
-    for asset in assets:
-        print(json.dumps(asset.to_dict(), indent=2, sort_keys=True))
 
 
 def register_observation(service: ApplicationService) -> None:
@@ -127,18 +119,33 @@ def register_observation(service: ApplicationService) -> None:
         print(json.dumps(event.data, indent=2, sort_keys=True))
 
 
-def list_observations(service: ApplicationService) -> None:
-    """Print registered Observations."""
-    observations = service.list_observations()
-    if not observations:
-        print("No Observations registered.")
+def show_timeline(service: ApplicationService) -> None:
+    """Print Timeline entries."""
+    query = _timeline_query()
+    result = service.show_timeline(query)
+    if not result.entries:
+        print("No Timeline entries.")
         return
-    for observation in observations:
-        print(json.dumps(observation.to_dict(), indent=2, sort_keys=True))
+    for entry in result.entries:
+        print(json.dumps(entry.to_dict(), indent=2, sort_keys=True))
+
+
+def replay_timeline(service: ApplicationService) -> None:
+    """Replay Timeline entries."""
+    query = _replay_query()
+    result = service.replay_timeline(query)
+    if not result.entries:
+        print("No Timeline entries to replay.")
+        return
+    for entry in result.entries:
+        print(
+            f"{entry.timestamp} {entry.observation_type}={entry.value} "
+            f"{entry.unit} asset={entry.asset_id}"
+        )
 
 
 def show_domain_events(events: list[EventEnvelope]) -> None:
-    """Print all domain events seen by the playground event bus."""
+    """Print all domain events seen by the Horizon Lab event bus."""
     if not events:
         print("No Domain Events published.")
         return
@@ -147,12 +154,42 @@ def show_domain_events(events: list[EventEnvelope]) -> None:
 
 
 def _console_subscriber() -> EventSubscriber:
-    """Create a console subscriber for playground events."""
+    """Create a console subscriber for lab events."""
 
     def handle(envelope: EventEnvelope) -> None:
         print(f"[event-bus] {envelope.event_name.value}")
 
-    return EventSubscriber(name="playground-console", handler=handle)
+    return EventSubscriber(name="horizon-lab-console", handler=handle)
+
+
+def _timeline_query() -> GetTimelineQuery:
+    """Prompt for optional Timeline filters."""
+    asset_id = input("Asset ID optional: ").strip() or None
+    observation_type = input("Type optional: ").strip() or None
+    start_at = input("Start timestamp optional: ").strip() or None
+    end_at = input("End timestamp optional: ").strip() or None
+    cursor_at = input("Cursor timestamp optional: ").strip() or None
+    return GetTimelineQuery(
+        asset_id=asset_id,
+        observation_type=observation_type,
+        start_at=start_at,
+        end_at=end_at,
+        cursor_at=cursor_at,
+    )
+
+
+def _replay_query() -> ReplayTimelineQuery:
+    """Prompt for optional replay filters."""
+    asset_id = input("Asset ID optional: ").strip() or None
+    observation_type = input("Type optional: ").strip() or None
+    start_at = input("Start timestamp optional: ").strip() or None
+    end_at = input("End timestamp optional: ").strip() or None
+    return ReplayTimelineQuery(
+        asset_id=asset_id,
+        observation_type=observation_type,
+        start_at=start_at,
+        end_at=end_at,
+    )
 
 
 if __name__ == "__main__":

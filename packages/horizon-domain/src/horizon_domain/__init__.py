@@ -33,6 +33,14 @@ from horizon_domain.observation import (
     ObservationValue,
     RegisterObservation,
 )
+from horizon_domain.timeline import (
+    ReplayEngine,
+    Timeline,
+    TimelineCursor,
+    TimelineEntry,
+    TimelineQuery,
+    TimelineRepository,
+)
 
 __all__ = [
     "ActivateAsset",
@@ -62,6 +70,12 @@ __all__ = [
     "ObservationValue",
     "RegisterAsset",
     "RegisterObservation",
+    "ReplayEngine",
     "TransferOwnership",
+    "Timeline",
+    "TimelineCursor",
+    "TimelineEntry",
+    "TimelineQuery",
+    "TimelineRepository",
     "UpdateConfiguration",
 ]

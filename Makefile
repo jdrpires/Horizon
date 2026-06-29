@@ -1,4 +1,4 @@
-.PHONY: install lint format test coverage run docker clean
+.PHONY: install lint format test coverage run lab docker clean
 
 install:
 	poetry install
@@ -20,6 +20,9 @@ coverage:
 
 run:
 	poetry run uvicorn horizon_api.main:app --host 0.0.0.0 --port 8000
+
+lab:
+	python apps/horizon-lab/main.py
 
 docker:
 	docker compose up --build
