@@ -27,6 +27,9 @@ docker-compose.override.yml
 
 storage/*.json
 
+apps/horizon-mobile/.gradle/
+apps/horizon-mobile/local.properties
+apps/horizon-mobile/app/build/
 apps/android-obd-bridge/.gradle/
 apps/android-obd-bridge/local.properties
 apps/android-obd-bridge/app/build/

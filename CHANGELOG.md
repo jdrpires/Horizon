@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Rename Android OBD Bridge to Horizon Mobile and add client screens for Assets, Current State, Timeline, Connection, and Settings.
 - Add Capability-009 Live Ingestion Gateway for local `POST /observations`.
 - Update Android OBD Bridge with configurable HTTP sink for Gateway ingestion.
 - Record Milestone M1: First Live Observation with Citroën C3, ELM327, and Android OBD Bridge.
