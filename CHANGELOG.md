@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add Capability-006 Collector Framework for generic observation ingestion.
 - Add Sprint-012 Observation Catalog capability.
 - Add Vehicle Observation catalog and catalog-driven Horizon Lab Observation flow.
 - Add Sprint-011 Experience Layer for user-friendly Horizon Lab interaction.

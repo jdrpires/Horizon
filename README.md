@@ -73,6 +73,7 @@ apps/
 packages/
   horizon-application/         In-memory orchestration and use cases
   horizon-catalog/             Official Observation Catalog
+  horizon-collector/           Generic external Observation ingestion framework
   horizon-domain/              Asset, Observation, Timeline, Current State
   horizon-events/              Event envelopes and in-memory event movement
   horizon-experience/          User-facing terminal presentation helpers
@@ -180,6 +181,7 @@ Implemented:
 - Storage
 - Experience Layer
 - Observation Catalog
+- Collector Framework
 
 Still on the roadmap:
 
@@ -188,7 +190,7 @@ Still on the roadmap:
 - Living Digital Twin
 - Knowledge Engine
 - Conversation Engine
-- Collector
+- Transport-specific Collectors
 - API
 
 ## Contribution
