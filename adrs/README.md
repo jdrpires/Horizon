@@ -11,3 +11,4 @@
 - [ADR-0009: Presentation Layer](ADR-0009-PRESENTATION_LAYER.md)
 - [ADR-0010: Catalog Architecture](ADR-0010-CATALOG_ARCHITECTURE.md)
 - [ADR-0011: Collector Runtime](ADR-0011-COLLECTOR_RUNTIME.md)
+- [ADR-0012: OBD Collector Boundary](ADR-0012-OBD_COLLECTOR_BOUNDARY.md)

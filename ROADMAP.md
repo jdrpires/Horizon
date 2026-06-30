@@ -2,10 +2,11 @@
 
 ## Current
 
-- Introduce a generic Collector Framework for external observation ingestion without transport-specific integrations.
+- Validate the Android/ELM327 OBD Collector Spike through mock transport and documented Android boundaries.
 
 ## Next
 
+- Decide the approved runtime for real Android Bluetooth execution.
 - Design transport-specific collectors behind the generic Collector Framework.
 - Design the future Observation Value Model for non-numeric observations.
 - Review Experience Profiles and Developer Mode as explicit future capabilities.

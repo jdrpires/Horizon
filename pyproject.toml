@@ -15,6 +15,7 @@ packages = [
   { include = "horizon_collector", from = "packages/horizon-collector/src" },
   { include = "horizon_experience", from = "packages/horizon-experience/src" },
   { include = "horizon_storage", from = "packages/horizon-storage/src" },
+  { include = "collector_obd", from = "packages/collector-obd/src" },
   { include = "horizon_api", from = "services/api/src" },
   { include = "domain", from = "packages/kernel" },
   { include = "shared", from = "packages" }
@@ -47,7 +48,7 @@ target-version = ["py313"]
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-src = ["services/api/src", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages/horizon-protocol/src", "packages/horizon-domain/src", "packages/horizon-application/src", "packages/horizon-catalog/src", "packages/horizon-collector/src", "packages/horizon-experience/src", "packages/horizon-storage/src", "packages", "tests"]
+src = ["services/api/src", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages/horizon-protocol/src", "packages/horizon-domain/src", "packages/horizon-application/src", "packages/horizon-catalog/src", "packages/horizon-collector/src", "packages/collector-obd/src", "packages/horizon-experience/src", "packages/horizon-storage/src", "packages", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
@@ -73,6 +74,8 @@ files = [
   "packages/horizon-catalog/tests",
   "packages/horizon-collector/src",
   "packages/horizon-collector/tests",
+  "packages/collector-obd/src",
+  "packages/collector-obd/tests",
   "packages/horizon-experience/src",
   "packages/horizon-experience/tests",
   "packages/horizon-storage/src",
@@ -89,6 +92,7 @@ mypy_path = [
   "packages/horizon-application/src",
   "packages/horizon-catalog/src",
   "packages/horizon-collector/src",
+  "packages/collector-obd/src",
   "packages/horizon-experience/src",
   "packages/horizon-storage/src",
   "packages/kernel",
@@ -97,11 +101,11 @@ mypy_path = [
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers"
-testpaths = ["tests", "services/api/tests", "packages/horizon-events/tests", "packages/horizon-kernel/tests", "packages/horizon-protocol/tests", "packages/horizon-domain/tests", "packages/horizon-application/tests", "packages/horizon-catalog/tests", "packages/horizon-collector/tests", "packages/horizon-experience/tests", "packages/horizon-storage/tests"]
+testpaths = ["tests", "services/api/tests", "packages/horizon-events/tests", "packages/horizon-kernel/tests", "packages/horizon-protocol/tests", "packages/horizon-domain/tests", "packages/horizon-application/tests", "packages/horizon-catalog/tests", "packages/horizon-collector/tests", "packages/collector-obd/tests", "packages/horizon-experience/tests", "packages/horizon-storage/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["horizon_api", "horizon_events", "horizon_kernel", "horizon_protocol", "horizon_domain", "horizon_application", "horizon_catalog", "horizon_collector", "horizon_experience", "horizon_storage", "domain", "shared"]
+source = ["horizon_api", "horizon_events", "horizon_kernel", "horizon_protocol", "horizon_domain", "horizon_application", "horizon_catalog", "horizon_collector", "collector_obd", "horizon_experience", "horizon_storage", "domain", "shared"]
 
 [tool.coverage.report]
 show_missing = true
