@@ -69,7 +69,7 @@ The current system starts with Asset identity, factual Observations, a catalog f
 
 ```text
 apps/
-  android-obd-bridge/          Minimal Android/ELM327 OBD bridge
+  horizon-mobile/              Android Horizon client for live Asset state
   horizon-lab/                 Local interactive lab
 packages/
   horizon-application/         In-memory orchestration and use cases
@@ -169,6 +169,39 @@ Horizon evolves through institutional governance before implementation. Major wo
 - [Capability Model](docs/governance/CAPABILITY_MODEL.md): The difference between Epics, Capabilities, Sprints, Features, Tasks, Bugs, RFCs, ADRs, and SPECs.
 - [Repository Principles](docs/governance/REPOSITORY_PRINCIPLES.md): The repository rules that protect Domain, memory, explainability, and traceability.
 
+## Release Status
+
+Current release: **Alpha 1.0**.
+
+Alpha 1.0 stabilizes the first generation of Horizon architecture. It includes the foundation, Asset and Observation memory path, Timeline, Current State, Storage, Observation Catalog, Collector Framework, Live Ingestion Gateway, and Horizon Mobile.
+
+The first real vehicle integration has been completed through the Citroen C3 field test recorded as [M1: First Live Observation](milestones/M1-FIRST-LIVE-OBSERVATION.md).
+
+Release documentation:
+
+- [Alpha 1.0](releases/alpha/ALPHA-1.0.md)
+- [Release Notes](releases/alpha/RELEASE_NOTES.md)
+- [Architecture Summary](releases/alpha/ARCHITECTURE_SUMMARY.md)
+- [Capability Matrix](releases/alpha/CAPABILITY_MATRIX.md)
+- [Known Limitations](releases/alpha/KNOWN_LIMITATIONS.md)
+- [Next Generation](releases/alpha/NEXT_GENERATION.md)
+
+## Project Timeline
+
+```text
+Foundation
+  ↓
+Collector
+  ↓
+Gateway
+  ↓
+Horizon Mobile
+  ↓
+Alpha 1.0
+```
+
+The current roadmap is maintained in [docs/roadmap/ROADMAP.md](docs/roadmap/ROADMAP.md).
+
 ## Current Project Status
 
 Horizon is in Alpha.
@@ -176,7 +209,7 @@ Horizon is in Alpha.
 Milestones:
 
 - [M1: First Live Observation](milestones/M1-FIRST-LIVE-OBSERVATION.md): first physical Asset observation recorded from a Citroën C3 through ELM327 Bluetooth and the Android OBD Bridge.
-- M2: Live Ingestion adds local `POST /observations` ingestion from Android OBD Bridge into Horizon.
+- M2: Live Ingestion adds local `POST /observations` ingestion from Horizon Mobile into Horizon.
 
 Implemented:
 
@@ -191,7 +224,7 @@ Implemented:
 - Observation Catalog
 - Collector Framework
 - Android/ELM327 OBD Collector Spike
-- Android OBD Bridge
+- Horizon Mobile
 - Live Ingestion Gateway
 
 Still on the roadmap:
