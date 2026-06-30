@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 from pathlib import Path
@@ -12,6 +11,7 @@ for source_path in (
     ROOT / "packages" / "horizon-application" / "src",
     ROOT / "packages" / "horizon-domain" / "src",
     ROOT / "packages" / "horizon-events" / "src",
+    ROOT / "packages" / "horizon-experience" / "src",
     ROOT / "packages" / "horizon-kernel" / "src",
     ROOT / "packages" / "horizon-storage" / "src",
 ):
@@ -24,15 +24,24 @@ from horizon_application import (  # noqa: E402
     InMemoryTimelineRepository,
     RegisterAssetCommand,
     RegisterObservationCommand,
-    ReplayTimelineQuery,
 )
-from horizon_events import EventEnvelope, EventSubscriber  # noqa: E402
+from horizon_experience import (  # noqa: E402
+    UserCancelled,
+    choose_from_list,
+    print_current_state,
+    print_menu,
+    print_timeline,
+    prompt_float,
+    prompt_optional_datetime,
+    prompt_text,
+)
+from horizon_experience.formatters import friendly_unit, friendly_value  # noqa: E402
+from horizon_experience.rendering import error, info, section, success  # noqa: E402
 from horizon_storage import JsonStorageBootstrap  # noqa: E402
 
 
 def main() -> None:
     """Run the terminal Horizon Lab."""
-    seen_events: list[EventEnvelope] = []
     bootstrap = JsonStorageBootstrap(_storage_path()).bootstrap()
     timeline_repository = InMemoryTimelineRepository()
     for observation in bootstrap.observation_repository.list():
@@ -41,15 +50,11 @@ def main() -> None:
         repository=bootstrap.asset_repository,
         observation_repository=bootstrap.observation_repository,
         timeline_repository=timeline_repository,
-        event_subscribers=(_console_subscriber(),),
-    )
-    service.event_bus.subscribe(
-        EventSubscriber(name="horizon-lab-memory", handler=seen_events.append)
     )
     print_startup(bootstrap.assets_loaded, bootstrap.observations_loaded, bootstrap.storage_kind)
     while True:
         print_menu()
-        option = input("Select an option: ").strip()
+        option = _read_menu_option()
         if option == "1":
             register_asset(service)
         elif option == "2":
@@ -57,190 +62,117 @@ def main() -> None:
         elif option == "3":
             show_timeline(service)
         elif option == "4":
-            replay_timeline(service)
-        elif option == "5":
             show_current_state(service)
-        elif option == "6":
-            show_domain_events(seen_events)
-        elif option == "7":
-            print("Bye.")
+        elif option == "5":
+            print("Até logo.")
             return
         else:
-            print("Invalid option.")
-
-
-def print_menu() -> None:
-    """Print the Horizon Lab menu."""
-    print("====================================")
+            error("Escolha uma opção válida.")
 
 
 def print_startup(assets_loaded: int, observations_loaded: int, storage_kind: str) -> None:
     """Print Horizon Lab startup storage summary."""
-    print("====================================")
-    print("HORIZON LAB")
+    section("HORIZON LAB")
     print(f"Assets carregados: {assets_loaded}")
-    print(f"Observations carregadas: {observations_loaded}")
-    print("Storage:")
-    print(storage_kind)
-    print("====================================")
-    print("HORIZON LAB")
-    print("1 Register Asset")
-    print("2 Register Observation")
-    print("3 Show Timeline")
-    print("4 Replay Timeline")
-    print("5 Show Current State")
-    print("6 List Events")
-    print("7 Exit")
-    print("====================================")
+    print(f"Observações carregadas: {observations_loaded}")
+    print("Dados locais prontos.")
+    info("Digite 'c' em qualquer formulário para cancelar e voltar ao menu.")
 
 
 def register_asset(service: ApplicationService) -> None:
     """Prompt for Asset fields and register it."""
-    name = input("Identification: ").strip()
-    category = input("Classification: ").strip()
-    owner_id = input("Owner: ").strip()
-    result = service.register_asset(
-        RegisterAssetCommand(name=name, category=category, owner_id=owner_id)
-    )
-    print("Aggregate created:")
-    print(json.dumps(result.asset.to_dict(), indent=2, sort_keys=True))
-    print("Domain Events produced:")
-    for event in result.events:
-        domain_event = event.data["event"]
-        print(json.dumps(domain_event, indent=2, sort_keys=True))
-    print("Event Envelopes:")
-    for event in result.events:
-        print(json.dumps(event.data, indent=2, sort_keys=True))
+    section("Cadastrar Asset")
+    try:
+        name = prompt_text("Nome do Asset")
+        category = prompt_text("Tipo do Asset")
+        owner_id = prompt_text("Proprietário")
+        result = service.register_asset(
+            RegisterAssetCommand(name=name, category=category, owner_id=owner_id)
+        )
+    except UserCancelled:
+        info("Cadastro cancelado.")
+        return
+    except Exception as exc:
+        error(_friendly_failure(exc, "Não foi possível cadastrar o Asset."))
+        return
+    success(f"Asset cadastrado: {result.asset.name}.")
 
 
 def register_observation(service: ApplicationService) -> None:
     """Prompt for Observation fields and register it."""
+    section("Registrar Observação")
     assets = service.list_assets()
     if not assets:
-        print("Register an Asset before registering an Observation.")
+        info("Cadastre um Asset antes de registrar uma observação.")
         return
-    for index, asset in enumerate(assets, start=1):
-        print(f"{index} - {asset.name} ({asset.asset_id})")
-    selected = int(input("Select Asset: ").strip())
-    asset = assets[selected - 1]
-    observation_type = input("Type: ").strip()
-    value = float(input("Value: ").strip())
-    unit = input("Unit: ").strip()
-    source = input("Source: ").strip()
-    timestamp = input("Timestamp ISO optional: ").strip() or None
-    result = service.register_observation(
-        RegisterObservationCommand(
-            asset_id=asset.asset_id,
-            observation_type=observation_type,
-            value=value,
-            unit=unit,
-            source=source,
-            timestamp=timestamp,
+    try:
+        asset = choose_from_list("Escolha o Asset", assets, lambda item: item.name)
+        observation_type = prompt_text("Tipo da Observação")
+        value = prompt_float("Valor")
+        unit = prompt_text("Unidade")
+        source = prompt_text("Origem")
+        timestamp = prompt_optional_datetime("Data/Hora (opcional)")
+        result = service.register_observation(
+            RegisterObservationCommand(
+                asset_id=asset.asset_id,
+                observation_type=observation_type,
+                value=value,
+                unit=unit,
+                source=source,
+                timestamp=timestamp,
+            )
         )
-    )
-    print("Observation created:")
-    print(json.dumps(result.observation.to_dict(), indent=2, sort_keys=True))
-    print("Aggregate:")
-    print(json.dumps(result.observation.to_dict(), indent=2, sort_keys=True))
-    print("Domain Events produced:")
-    for event in result.events:
-        print(json.dumps(event.data["event"], indent=2, sort_keys=True))
-    print("Event Envelopes:")
-    for event in result.events:
-        print(json.dumps(event.data, indent=2, sort_keys=True))
+    except UserCancelled:
+        info("Registro cancelado.")
+        return
+    except Exception as exc:
+        error(_friendly_failure(exc, "Não foi possível registrar a observação."))
+        return
+    value = friendly_value(result.observation.value)
+    unit = friendly_unit(result.observation.unit)
+    success(f"Observação registrada: {value} {unit}.")
 
 
 def show_timeline(service: ApplicationService) -> None:
     """Print Timeline entries."""
-    query = _timeline_query()
-    result = service.show_timeline(query)
-    if not result.entries:
-        print("No Timeline entries.")
-        return
-    for entry in result.entries:
-        print(json.dumps(entry.to_dict(), indent=2, sort_keys=True))
-
-
-def replay_timeline(service: ApplicationService) -> None:
-    """Replay Timeline entries."""
-    query = _replay_query()
-    result = service.replay_timeline(query)
-    if not result.entries:
-        print("No Timeline entries to replay.")
-        return
-    for entry in result.entries:
-        print(
-            f"{entry.timestamp} {entry.observation_type}={entry.value} "
-            f"{entry.unit} asset={entry.asset_id}"
-        )
+    result = service.show_timeline(GetTimelineQuery())
+    print_timeline(result.entries)
 
 
 def show_current_state(service: ApplicationService) -> None:
     """Print Current State for a selected Asset."""
+    section("Estado Atual")
     assets = service.list_assets()
     if not assets:
-        print("Register an Asset before showing Current State.")
+        info("Cadastre um Asset antes de visualizar o Current State.")
         return
-    for index, asset in enumerate(assets, start=1):
-        print(f"{index} - {asset.name} ({asset.asset_id})")
-    selected = int(input("Select Asset: ").strip())
-    asset = assets[selected - 1]
+    try:
+        asset = choose_from_list("Escolha o Asset", assets, lambda item: item.name)
+    except UserCancelled:
+        info("Consulta cancelada.")
+        return
     snapshot = service.get_current_state(GetCurrentStateQuery(asset_id=asset.asset_id))
-    print("Current State:")
-    print(json.dumps(snapshot.to_dict(), indent=2, sort_keys=True))
-    print(f"Last update: {snapshot.last_updated_at}")
-    print(f"Observations: {snapshot.observation_count}")
-    print("Latest Observation by type:")
-    for value in snapshot.values:
-        print(json.dumps(value.to_dict(), indent=2, sort_keys=True))
+    print_current_state(asset.name, asset.status, snapshot)
 
 
-def show_domain_events(events: list[EventEnvelope]) -> None:
-    """Print all domain events seen by the Horizon Lab event bus."""
-    if not events:
-        print("No Domain Events published.")
-        return
-    for envelope in events:
-        print(json.dumps(dict(envelope.event), indent=2, sort_keys=True))
+def _read_menu_option() -> str:
+    """Read the main menu option without crashing on closed input."""
+    try:
+        return input("Escolha uma opção: ").strip()
+    except EOFError:
+        return "5"
 
 
-def _console_subscriber() -> EventSubscriber:
-    """Create a console subscriber for lab events."""
-
-    def handle(envelope: EventEnvelope) -> None:
-        print(f"[event-bus] {envelope.event_name.value}")
-
-    return EventSubscriber(name="horizon-lab-console", handler=handle)
-
-
-def _timeline_query() -> GetTimelineQuery:
-    """Prompt for optional Timeline filters."""
-    asset_id = input("Asset ID optional: ").strip() or None
-    observation_type = input("Type optional: ").strip() or None
-    start_at = input("Start timestamp optional: ").strip() or None
-    end_at = input("End timestamp optional: ").strip() or None
-    cursor_at = input("Cursor timestamp optional: ").strip() or None
-    return GetTimelineQuery(
-        asset_id=asset_id,
-        observation_type=observation_type,
-        start_at=start_at,
-        end_at=end_at,
-        cursor_at=cursor_at,
-    )
-
-
-def _replay_query() -> ReplayTimelineQuery:
-    """Prompt for optional replay filters."""
-    asset_id = input("Asset ID optional: ").strip() or None
-    observation_type = input("Type optional: ").strip() or None
-    start_at = input("Start timestamp optional: ").strip() or None
-    end_at = input("End timestamp optional: ").strip() or None
-    return ReplayTimelineQuery(
-        asset_id=asset_id,
-        observation_type=observation_type,
-        start_at=start_at,
-        end_at=end_at,
-    )
+def _friendly_failure(exc: Exception, fallback: str) -> str:
+    """Map internal failures to user-facing messages."""
+    message = str(exc)
+    if "observation.type.unknown" in message or "known observation type" in message:
+        return "Tipo da Observação não reconhecido."
+    if "timestamp" in message and "future" in message:
+        return "Data/Hora não pode estar no futuro."
+    if "must be finite" in message:
+        return "Valor precisa ser um número válido."
+    return fallback
 
 
 def _storage_path() -> Path:
@@ -250,4 +182,8 @@ def _storage_path() -> Path:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print()
+        print("Até logo.")

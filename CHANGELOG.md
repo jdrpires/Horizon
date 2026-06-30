@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add Sprint-011 Experience Layer for user-friendly Horizon Lab interaction.
+- Hide technical Horizon Lab details from normal user output.
+- Add validation loops for Horizon Lab terminal input.
 - Add Sprint-010 JSON persistence layer for Asset and Observation facts.
 - Rebuild Timeline and Current State from persisted Observations on Horizon Lab startup.
 - Add `horizon-storage` package with JSON adapter, serializers, repositories, and bootstrap.

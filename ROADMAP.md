@@ -2,10 +2,11 @@
 
 ## Current
 
-- Complete local fact persistence for core domain flows while keeping projections derived.
+- Improve Horizon Lab user experience without changing platform behavior.
 
 ## Next
 
+- Review Experience Profiles and Developer Mode as explicit future capabilities.
 - Use JSON persistence as the local adapter until a future storage architecture is approved.
 - Improve implementation-level test automation when Python 3.13 and Poetry are available.
 - Use the Temporal Memory Engine as the local replay foundation before Event Store architecture is approved.
