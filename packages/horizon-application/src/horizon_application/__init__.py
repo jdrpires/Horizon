@@ -1,6 +1,11 @@
 """Horizon Application public API."""
 
 from horizon_application.commands import RegisterAssetCommand, RegisterObservationCommand
+from horizon_application.current_state import (
+    CurrentStateSnapshotDTO,
+    CurrentStateValueDTO,
+    GetCurrentStateQuery,
+)
 from horizon_application.dto import (
     AssetDTO,
     EventEnvelopeDTO,
@@ -40,11 +45,14 @@ __all__ = [
     "ApplicationService",
     "AssetDTO",
     "CommandDispatcher",
+    "CurrentStateSnapshotDTO",
+    "CurrentStateValueDTO",
     "DomainEventEnvelopeMapper",
     "EventEnvelopeDTO",
     "InMemoryAssetRepository",
     "InMemoryObservationRepository",
     "InMemoryTimelineRepository",
+    "GetCurrentStateQuery",
     "InMemoryUnitOfWork",
     "GetTimelineQuery",
     "ListAssetsQuery",

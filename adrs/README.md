@@ -6,3 +6,4 @@
 - [ADR-0004: Asset is the Root Aggregate of Horizon](ADR-0004-ASSET_ROOT_AGGREGATE.md)
 - [ADR-0005: Observation Lifecycle](ADR-0005-OBSERVATION_LIFECYCLE.md)
 - [ADR-0006: Temporal Timeline](ADR-0006-TEMPORAL_TIMELINE.md)
+- [ADR-0007: Current State Engine](ADR-0007-CURRENT_STATE_ENGINE.md)

@@ -17,6 +17,7 @@ for source_path in (
 
 from horizon_application import (  # noqa: E402
     ApplicationService,
+    GetCurrentStateQuery,
     GetTimelineQuery,
     RegisterAssetCommand,
     RegisterObservationCommand,
@@ -42,8 +43,10 @@ def main() -> None:
         elif option == "4":
             replay_timeline(service)
         elif option == "5":
-            show_domain_events(seen_events)
+            show_current_state(service)
         elif option == "6":
+            show_domain_events(seen_events)
+        elif option == "7":
             print("Bye.")
             return
         else:
@@ -58,8 +61,9 @@ def print_menu() -> None:
     print("2 Register Observation")
     print("3 Show Timeline")
     print("4 Replay Timeline")
-    print("5 List Events")
-    print("6 Exit")
+    print("5 Show Current State")
+    print("6 List Events")
+    print("7 Exit")
     print("====================================")
 
 
@@ -142,6 +146,26 @@ def replay_timeline(service: ApplicationService) -> None:
             f"{entry.timestamp} {entry.observation_type}={entry.value} "
             f"{entry.unit} asset={entry.asset_id}"
         )
+
+
+def show_current_state(service: ApplicationService) -> None:
+    """Print Current State for a selected Asset."""
+    assets = service.list_assets()
+    if not assets:
+        print("Register an Asset before showing Current State.")
+        return
+    for index, asset in enumerate(assets, start=1):
+        print(f"{index} - {asset.name} ({asset.asset_id})")
+    selected = int(input("Select Asset: ").strip())
+    asset = assets[selected - 1]
+    snapshot = service.get_current_state(GetCurrentStateQuery(asset_id=asset.asset_id))
+    print("Current State:")
+    print(json.dumps(snapshot.to_dict(), indent=2, sort_keys=True))
+    print(f"Last update: {snapshot.last_updated_at}")
+    print(f"Observations: {snapshot.observation_count}")
+    print("Latest Observation by type:")
+    for value in snapshot.values:
+        print(json.dumps(value.to_dict(), indent=2, sort_keys=True))
 
 
 def show_domain_events(events: list[EventEnvelope]) -> None:
