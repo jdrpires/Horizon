@@ -13,3 +13,4 @@
 - [RFC-0010: Observation Catalog](RFC-0010-OBSERVATION_CATALOG.md) - Accepted
 - [RFC-0011: Collector Framework](RFC-0011-COLLECTOR_FRAMEWORK.md) - Accepted
 - [RFC-0012: Android OBD Collector](RFC-0012-ANDROID_OBD_COLLECTOR.md) - Accepted
+- [RFC-0013: Android OBD Bridge](RFC-0013-ANDROID_OBD_BRIDGE.md) - Accepted

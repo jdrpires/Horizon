@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add Capability-008 Android OBD Bridge app.
 - Add Capability-007 Android/ELM327 OBD Collector Spike.
 - Add Capability-006 Collector Framework for generic observation ingestion.
 - Add Sprint-012 Observation Catalog capability.
