@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add Sprint-012 Observation Catalog capability.
+- Add Vehicle Observation catalog and catalog-driven Horizon Lab Observation flow.
 - Add Sprint-011 Experience Layer for user-friendly Horizon Lab interaction.
 - Hide technical Horizon Lab details from normal user output.
 - Add validation loops for Horizon Lab terminal input.

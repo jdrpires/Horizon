@@ -2,10 +2,11 @@
 
 ## Current
 
-- Improve Horizon Lab user experience without changing platform behavior.
+- Introduce official Observation Catalog capabilities without changing runtime behavior.
 
 ## Next
 
+- Design the future Observation Value Model for non-numeric observations.
 - Review Experience Profiles and Developer Mode as explicit future capabilities.
 - Use JSON persistence as the local adapter until a future storage architecture is approved.
 - Improve implementation-level test automation when Python 3.13 and Poetry are available.

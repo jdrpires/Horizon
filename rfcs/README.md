@@ -10,3 +10,4 @@
 - [RFC-0007: Current State Engine](RFC-0007-CURRENT_STATE_ENGINE.md) - Accepted
 - [RFC-0008: Persistence Layer](RFC-0008-PERSISTENCE_LAYER.md) - Accepted
 - [RFC-0009: Experience Layer](RFC-0009-EXPERIENCE_LAYER.md) - Accepted
+- [RFC-0010: Observation Catalog](RFC-0010-OBSERVATION_CATALOG.md) - Accepted

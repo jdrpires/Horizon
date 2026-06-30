@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 for source_path in (
     ROOT / "packages" / "horizon-application" / "src",
+    ROOT / "packages" / "horizon-catalog" / "src",
     ROOT / "packages" / "horizon-domain" / "src",
     ROOT / "packages" / "horizon-events" / "src",
     ROOT / "packages" / "horizon-experience" / "src",
@@ -25,6 +26,7 @@ from horizon_application import (  # noqa: E402
     RegisterAssetCommand,
     RegisterObservationCommand,
 )
+from horizon_catalog import ValueType, load_vehicle_catalog, validate_value  # noqa: E402
 from horizon_experience import (  # noqa: E402
     UserCancelled,
     choose_from_list,
@@ -32,7 +34,6 @@ from horizon_experience import (  # noqa: E402
     print_menu,
     print_timeline,
     prompt_float,
-    prompt_optional_datetime,
     prompt_text,
 )
 from horizon_experience.formatters import friendly_unit, friendly_value  # noqa: E402
@@ -107,19 +108,28 @@ def register_observation(service: ApplicationService) -> None:
         return
     try:
         asset = choose_from_list("Escolha o Asset", assets, lambda item: item.name)
-        observation_type = prompt_text("Tipo da Observação")
+        catalog = load_vehicle_catalog()
+        category = choose_from_list("Escolha a categoria", catalog.categories, lambda item: item)
+        definition = choose_from_list(
+            "Escolha a observação",
+            catalog.by_category(category),
+            lambda item: item.label,
+        )
+        if definition.value_type is not ValueType.NUMBER:
+            info(
+                "🚧 Este tipo de observação já existe no Catálogo, "
+                "mas ainda não é suportado pelo Runtime atual."
+            )
+            return
         value = prompt_float("Valor")
-        unit = prompt_text("Unidade")
-        source = prompt_text("Origem")
-        timestamp = prompt_optional_datetime("Data/Hora (opcional)")
+        validated_value = validate_value(definition, value)
         result = service.register_observation(
             RegisterObservationCommand(
                 asset_id=asset.asset_id,
-                observation_type=observation_type,
-                value=value,
-                unit=unit,
-                source=source,
-                timestamp=timestamp,
+                observation_type=definition.runtime_observation_type,
+                value=float(validated_value),
+                unit=definition.unit,
+                source=definition.default_source,
             )
         )
     except UserCancelled:
