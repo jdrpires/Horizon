@@ -8,3 +8,4 @@
 - [RFC-0005: Observation Domain](RFC-0005-OBSERVATION_DOMAIN.md) - Accepted
 - [RFC-0006: Temporal Memory Engine](RFC-0006-TEMPORAL_MEMORY_ENGINE.md) - Accepted
 - [RFC-0007: Current State Engine](RFC-0007-CURRENT_STATE_ENGINE.md) - Accepted
+- [RFC-0008: Persistence Layer](RFC-0008-PERSISTENCE_LAYER.md) - Accepted

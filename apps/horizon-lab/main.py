@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -12,6 +13,7 @@ for source_path in (
     ROOT / "packages" / "horizon-domain" / "src",
     ROOT / "packages" / "horizon-events" / "src",
     ROOT / "packages" / "horizon-kernel" / "src",
+    ROOT / "packages" / "horizon-storage" / "src",
 ):
     sys.path.insert(0, str(source_path))
 
@@ -19,18 +21,32 @@ from horizon_application import (  # noqa: E402
     ApplicationService,
     GetCurrentStateQuery,
     GetTimelineQuery,
+    InMemoryTimelineRepository,
     RegisterAssetCommand,
     RegisterObservationCommand,
     ReplayTimelineQuery,
 )
 from horizon_events import EventEnvelope, EventSubscriber  # noqa: E402
+from horizon_storage import JsonStorageBootstrap  # noqa: E402
 
 
 def main() -> None:
     """Run the terminal Horizon Lab."""
     seen_events: list[EventEnvelope] = []
-    service = ApplicationService.create_in_memory(event_subscribers=(_console_subscriber(),))
-    service.event_bus.subscribe(EventSubscriber(name="horizon-lab-memory", handler=seen_events.append))
+    bootstrap = JsonStorageBootstrap(_storage_path()).bootstrap()
+    timeline_repository = InMemoryTimelineRepository()
+    for observation in bootstrap.observation_repository.list():
+        timeline_repository.append_observation(observation)
+    service = ApplicationService.create_with_repositories(
+        repository=bootstrap.asset_repository,
+        observation_repository=bootstrap.observation_repository,
+        timeline_repository=timeline_repository,
+        event_subscribers=(_console_subscriber(),),
+    )
+    service.event_bus.subscribe(
+        EventSubscriber(name="horizon-lab-memory", handler=seen_events.append)
+    )
+    print_startup(bootstrap.assets_loaded, bootstrap.observations_loaded, bootstrap.storage_kind)
     while True:
         print_menu()
         option = input("Select an option: ").strip()
@@ -55,6 +71,17 @@ def main() -> None:
 
 def print_menu() -> None:
     """Print the Horizon Lab menu."""
+    print("====================================")
+
+
+def print_startup(assets_loaded: int, observations_loaded: int, storage_kind: str) -> None:
+    """Print Horizon Lab startup storage summary."""
+    print("====================================")
+    print("HORIZON LAB")
+    print(f"Assets carregados: {assets_loaded}")
+    print(f"Observations carregadas: {observations_loaded}")
+    print("Storage:")
+    print(storage_kind)
     print("====================================")
     print("HORIZON LAB")
     print("1 Register Asset")
@@ -214,6 +241,12 @@ def _replay_query() -> ReplayTimelineQuery:
         start_at=start_at,
         end_at=end_at,
     )
+
+
+def _storage_path() -> Path:
+    """Return the configured Horizon Lab storage path."""
+    configured = os.environ.get("HORIZON_STORAGE_PATH")
+    return Path(configured) if configured else ROOT / "storage"
 
 
 if __name__ == "__main__":

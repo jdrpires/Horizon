@@ -11,6 +11,7 @@ packages = [
   { include = "horizon_protocol", from = "packages/horizon-protocol/src" },
   { include = "horizon_domain", from = "packages/horizon-domain/src" },
   { include = "horizon_application", from = "packages/horizon-application/src" },
+  { include = "horizon_storage", from = "packages/horizon-storage/src" },
   { include = "horizon_api", from = "services/api/src" },
   { include = "domain", from = "packages/kernel" },
   { include = "shared", from = "packages" }
@@ -43,7 +44,7 @@ target-version = ["py313"]
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-src = ["services/api/src", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages/horizon-protocol/src", "packages/horizon-domain/src", "packages/horizon-application/src", "packages", "tests"]
+src = ["services/api/src", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages/horizon-protocol/src", "packages/horizon-domain/src", "packages/horizon-application/src", "packages/horizon-storage/src", "packages", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "RUF"]
@@ -65,6 +66,8 @@ files = [
   "packages/horizon-domain/tests",
   "packages/horizon-application/src",
   "packages/horizon-application/tests",
+  "packages/horizon-storage/src",
+  "packages/horizon-storage/tests",
   "packages",
   "tests"
 ]
@@ -75,17 +78,18 @@ mypy_path = [
   "packages/horizon-protocol/src",
   "packages/horizon-domain/src",
   "packages/horizon-application/src",
+  "packages/horizon-storage/src",
   "packages/kernel",
   "packages"
 ]
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers"
-testpaths = ["tests", "services/api/tests", "packages/horizon-events/tests", "packages/horizon-kernel/tests", "packages/horizon-protocol/tests", "packages/horizon-domain/tests", "packages/horizon-application/tests"]
+testpaths = ["tests", "services/api/tests", "packages/horizon-events/tests", "packages/horizon-kernel/tests", "packages/horizon-protocol/tests", "packages/horizon-domain/tests", "packages/horizon-application/tests", "packages/horizon-storage/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["horizon_api", "horizon_events", "horizon_kernel", "horizon_protocol", "horizon_domain", "horizon_application", "domain", "shared"]
+source = ["horizon_api", "horizon_events", "horizon_kernel", "horizon_protocol", "horizon_domain", "horizon_application", "horizon_storage", "domain", "shared"]
 
 [tool.coverage.report]
 show_missing = true

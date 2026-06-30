@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from horizon_application.commands import RegisterAssetCommand, RegisterObservationCommand
+from horizon_application.contracts import AssetRepository, ObservationRepository
 from horizon_application.current_state import CurrentStateSnapshotDTO, GetCurrentStateQuery
 from horizon_application.current_state.handlers import GetCurrentStateQueryHandler
 from horizon_application.current_state.use_cases import GetCurrentStateUseCase
@@ -34,11 +35,14 @@ from horizon_application.timeline import (
     ReplayTimelineResultDTO,
     TimelineResultDTO,
 )
-from horizon_application.timeline.handlers import GetTimelineQueryHandler, ReplayTimelineQueryHandler
+from horizon_application.timeline.handlers import (
+    GetTimelineQueryHandler,
+    ReplayTimelineQueryHandler,
+)
 from horizon_application.timeline.use_cases import GetTimelineUseCase, ReplayTimelineUseCase
 from horizon_domain.current_state import CurrentStateService
 from horizon_application.use_cases import RegisterAssetUseCase, RegisterObservationUseCase
-from horizon_domain.timeline import ReplayEngine
+from horizon_domain.timeline import ReplayEngine, TimelineRepository
 from horizon_events import EventSubscriber, InMemoryEventBus
 from horizon_kernel import Clock
 
@@ -49,9 +53,9 @@ class ApplicationService:
     def __init__(
         self,
         *,
-        repository: InMemoryAssetRepository,
-        observation_repository: InMemoryObservationRepository,
-        timeline_repository: InMemoryTimelineRepository,
+        repository: AssetRepository,
+        observation_repository: ObservationRepository,
+        timeline_repository: TimelineRepository,
         unit_of_work: InMemoryUnitOfWork,
         event_bus: InMemoryEventBus,
         mediator: Mediator,
@@ -77,6 +81,25 @@ class ApplicationService:
         repository = InMemoryAssetRepository()
         observation_repository = InMemoryObservationRepository()
         timeline_repository = InMemoryTimelineRepository()
+        return cls.create_with_repositories(
+            repository=repository,
+            observation_repository=observation_repository,
+            timeline_repository=timeline_repository,
+            event_subscribers=event_subscribers,
+            clock=clock,
+        )
+
+    @classmethod
+    def create_with_repositories(
+        cls,
+        *,
+        repository: AssetRepository,
+        observation_repository: ObservationRepository,
+        timeline_repository: TimelineRepository,
+        event_subscribers: tuple[EventSubscriber, ...] = (),
+        clock: Clock | None = None,
+    ) -> ApplicationService:
+        """Create an application service with externally supplied repositories."""
         unit_of_work = InMemoryUnitOfWork()
         event_bus = InMemoryEventBus()
         for subscriber in event_subscribers:
