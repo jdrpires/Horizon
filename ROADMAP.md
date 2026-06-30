@@ -2,10 +2,11 @@
 
 ## Current
 
-- Introduce official Observation Catalog capabilities without changing runtime behavior.
+- Introduce a generic Collector Framework for external observation ingestion without transport-specific integrations.
 
 ## Next
 
+- Design transport-specific collectors behind the generic Collector Framework.
 - Design the future Observation Value Model for non-numeric observations.
 - Review Experience Profiles and Developer Mode as explicit future capabilities.
 - Use JSON persistence as the local adapter until a future storage architecture is approved.
