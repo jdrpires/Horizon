@@ -12,3 +12,4 @@
 - [RFC-0009: Experience Layer](RFC-0009-EXPERIENCE_LAYER.md) - Accepted
 - [RFC-0010: Observation Catalog](RFC-0010-OBSERVATION_CATALOG.md) - Accepted
 - [RFC-0011: Collector Framework](RFC-0011-COLLECTOR_FRAMEWORK.md) - Accepted
+- [RFC-0012: Android OBD Collector](RFC-0012-ANDROID_OBD_COLLECTOR.md) - Accepted

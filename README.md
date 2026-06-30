@@ -74,6 +74,7 @@ packages/
   horizon-application/         In-memory orchestration and use cases
   horizon-catalog/             Official Observation Catalog
   horizon-collector/           Generic external Observation ingestion framework
+  collector-obd/               Experimental Android/ELM327 OBD collector adapter
   horizon-domain/              Asset, Observation, Timeline, Current State
   horizon-events/              Event envelopes and in-memory event movement
   horizon-experience/          User-facing terminal presentation helpers
@@ -182,6 +183,7 @@ Implemented:
 - Experience Layer
 - Observation Catalog
 - Collector Framework
+- Android/ELM327 OBD Collector Spike
 
 Still on the roadmap:
 
@@ -190,7 +192,7 @@ Still on the roadmap:
 - Living Digital Twin
 - Knowledge Engine
 - Conversation Engine
-- Transport-specific Collectors
+- Production Bluetooth Collector
 - API
 
 ## Contribution
