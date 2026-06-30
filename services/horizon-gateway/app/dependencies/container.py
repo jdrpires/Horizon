@@ -12,7 +12,7 @@ from horizon_collector import CatalogObservationMapper, ObservationSourceMapping
 from horizon_storage import JsonStorageBootstrap
 
 from app.config import GatewaySettings
-from app.services import LiveIngestionService
+from app.services import HorizonQueryService, LiveIngestionService
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,6 +20,7 @@ class GatewayContainer:
     """Composed dependencies for one Gateway app instance."""
 
     ingestion_service: LiveIngestionService
+    query_service: HorizonQueryService
     storage_path: str
 
 
@@ -54,6 +55,7 @@ def build_container(settings: GatewaySettings) -> GatewayContainer:
             catalog=catalog,
             mapper=mapper,
         ),
+        query_service=HorizonQueryService(application),
         storage_path=str(settings.storage_path),
     )
 
@@ -63,3 +65,8 @@ def get_ingestion_service(request: Request) -> LiveIngestionService:
     container: GatewayContainer = request.app.state.container
     return container.ingestion_service
 
+
+def get_query_service(request: Request) -> HorizonQueryService:
+    """Return the app-scoped query service."""
+    container: GatewayContainer = request.app.state.container
+    return container.query_service

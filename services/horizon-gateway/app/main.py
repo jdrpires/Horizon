@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from app.api.assets import router as assets_router
 from app.api.observations import router as observations_router
 from app.config import GatewaySettings, get_settings
 from app.dependencies import build_container
@@ -19,6 +20,7 @@ def create_app(settings: GatewaySettings | None = None) -> FastAPI:
         redoc_url=None,
     )
     api.state.container = build_container(resolved_settings)
+    api.include_router(assets_router)
     api.include_router(observations_router)
 
     @api.get("/health")
@@ -30,4 +32,3 @@ def create_app(settings: GatewaySettings | None = None) -> FastAPI:
 
 
 app = create_app()
-
