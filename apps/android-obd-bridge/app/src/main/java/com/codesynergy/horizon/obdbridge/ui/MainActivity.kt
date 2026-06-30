@@ -9,6 +9,7 @@ import android.os.Looper
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -21,8 +22,8 @@ import com.codesynergy.horizon.obdbridge.elm327.ObdMapper
 import com.codesynergy.horizon.obdbridge.model.ObdCommands
 import com.codesynergy.horizon.obdbridge.model.ObdObservationPayload
 import com.codesynergy.horizon.obdbridge.model.ObservationReading
+import com.codesynergy.horizon.obdbridge.sink.HttpSink
 import com.codesynergy.horizon.obdbridge.sink.LogcatSink
-import com.codesynergy.horizon.obdbridge.sink.ObdObservationSink
 import java.time.Instant
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -35,10 +36,12 @@ class MainActivity : Activity() {
     private lateinit var temperatureText: TextView
     private lateinit var voltageText: TextView
     private lateinit var lastReadingText: TextView
+    private lateinit var gatewayUrlInput: EditText
+    private lateinit var assetReferenceInput: EditText
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-    private val sink: ObdObservationSink = LogcatSink()
+    private val logcatSink = LogcatSink()
     private var devices: List<BluetoothDeviceItem> = emptyList()
     private var connection: ObdConnection? = null
 
@@ -72,6 +75,14 @@ class MainActivity : Activity() {
         temperatureText = label("Temperatura: --")
         voltageText = label("Tensão: --")
         lastReadingText = label("Última leitura: --")
+        gatewayUrlInput = EditText(this).apply {
+            hint = "Gateway URL (ex: http://192.168.0.10:8000/observations)"
+            setSingleLine(true)
+        }
+        assetReferenceInput = EditText(this).apply {
+            hint = "Asset ID ou referência externa"
+            setSingleLine(true)
+        }
 
         val refreshButton = Button(this).apply {
             text = "Listar pareados"
@@ -85,8 +96,15 @@ class MainActivity : Activity() {
             text = "Iniciar leitura"
             setOnClickListener { readOnce() }
         }
+        val testGatewayButton = Button(this).apply {
+            text = "Testar Gateway"
+            setOnClickListener { testGatewayConnection() }
+        }
 
         root.addView(label("Horizon Android OBD Bridge"))
+        root.addView(gatewayUrlInput)
+        root.addView(assetReferenceInput)
+        root.addView(testGatewayButton)
         root.addView(deviceSpinner)
         root.addView(refreshButton)
         root.addView(connectButton)
@@ -161,6 +179,8 @@ class MainActivity : Activity() {
             statusText.text = "Status: conecte ao ELM327 antes de ler"
             return
         }
+        val gatewayUrl = gatewayUrlInput.text.toString().trim()
+        val assetReference = assetReferenceInput.text.toString().trim().ifBlank { null }
         statusText.text = "Status: lendo PIDs"
         executor.execute {
             runCatching {
@@ -170,13 +190,50 @@ class MainActivity : Activity() {
                     val value = Elm327Parser.parse(command, raw)
                     ObdMapper.toObservation(command, value, timestamp)
                 }
-                sink.emit(ObdObservationPayload(observations = readings))
+                emitPayload(
+                    payload = ObdObservationPayload(
+                        assetId = assetReference,
+                        observations = readings,
+                    ),
+                    gatewayUrl = gatewayUrl,
+                )
                 readings
             }.onSuccess { readings ->
                 mainHandler.post { renderReadings(readings) }
             }.onFailure { error ->
                 postStatus("Status: erro na leitura - ${error.message}")
             }
+        }
+    }
+
+    private fun testGatewayConnection() {
+        val gatewayUrl = gatewayUrlInput.text.toString().trim()
+        if (gatewayUrl.isBlank()) {
+            statusText.text = "Status: informe a URL do Gateway"
+            return
+        }
+        statusText.text = "Status: testando Gateway"
+        executor.execute {
+            runCatching {
+                HttpSink(gatewayUrl).testConnection()
+            }.onSuccess { reachable ->
+                postStatus(
+                    if (reachable) {
+                        "Status: Gateway alcançável"
+                    } else {
+                        "Status: Gateway indisponível"
+                    },
+                )
+            }.onFailure { error ->
+                postStatus("Status: erro no Gateway - ${error.message}")
+            }
+        }
+    }
+
+    private fun emitPayload(payload: ObdObservationPayload, gatewayUrl: String) {
+        logcatSink.emit(payload)
+        if (gatewayUrl.isNotBlank()) {
+            HttpSink(gatewayUrl).emit(payload)
         }
     }
 

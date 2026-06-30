@@ -55,4 +55,19 @@ class Elm327ParserTest {
         assertTrue(json.contains("\"definition_id\":\"engine.rpm\""))
         assertTrue(json.contains("\"value\":900"))
     }
+
+    @Test
+    fun encodesConfiguredAssetReference() {
+        val timestamp = Instant.parse("2026-06-30T20:00:00Z")
+        val payload = ObdObservationPayload(
+            assetId = "citroen-c3",
+            observations = listOf(
+                ObdMapper.toObservation(ObdCommands.rpm, 900.0, timestamp),
+            ),
+        )
+
+        val json = ObservationPayloadJson.encode(payload)
+
+        assertTrue(json.contains("\"asset_id\":\"citroen-c3\""))
+    }
 }

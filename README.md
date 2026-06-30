@@ -85,6 +85,7 @@ packages/
   kernel/                      Earlier shared package boundary
   shared/                      Shared package boundary
 services/
+  horizon-gateway/             Local live ingestion boundary
   api/                         API service boundary
 docs/
   foundations/                 Constitution and permanent manifestos
@@ -175,7 +176,7 @@ Horizon is in Alpha.
 Milestones:
 
 - [M1: First Live Observation](milestones/M1-FIRST-LIVE-OBSERVATION.md): first physical Asset observation recorded from a Citroën C3 through ELM327 Bluetooth and the Android OBD Bridge.
-- M2: Live Ingestion is the next milestone, focused on sending Android OBD Bridge payloads through `POST /observations` into Horizon.
+- M2: Live Ingestion adds local `POST /observations` ingestion from Android OBD Bridge into Horizon.
 
 Implemented:
 
@@ -191,6 +192,7 @@ Implemented:
 - Collector Framework
 - Android/ELM327 OBD Collector Spike
 - Android OBD Bridge
+- Live Ingestion Gateway
 
 Still on the roadmap:
 
@@ -199,7 +201,6 @@ Still on the roadmap:
 - Living Digital Twin
 - Knowledge Engine
 - Conversation Engine
-- Horizon Ingestion API
 - API
 
 ## Contribution
