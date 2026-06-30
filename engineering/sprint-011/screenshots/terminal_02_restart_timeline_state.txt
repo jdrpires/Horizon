@@ -1,0 +1,56 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Assets carregados: 1
+Observações carregadas: 1
+Dados locais prontos.
+Digite 'c' em qualquer formulário para cancelar e voltar ao menu.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Linha do tempo
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+30/06/2026 15:26
+RPM
+900 rpm
+Manual
+---------------------
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Estado Atual
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1 - Citroen C3
+Escolha o Asset: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Citroen C3
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Status
+Registrado
+
+RPM
+900 rpm
+
+Última atualização
+30/06/2026 15:26
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: Até logo.

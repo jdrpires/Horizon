@@ -1,0 +1,68 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Assets carregados: 0
+Observações carregadas: 0
+Dados locais prontos.
+Digite 'c' em qualquer formulário para cancelar e voltar ao menu.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: Erro: Escolha uma opção válida.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Registrar Observação
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cadastre um Asset antes de registrar uma observação.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cadastrar Asset
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nome do Asset: Erro: Nome do Asset não pode ficar em branco.
+Tente novamente ou digite 'c' para cancelar.
+Nome do Asset: Tipo do Asset: Proprietário: OK Asset cadastrado: Citroen C3.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Registrar Observação
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1 - Citroen C3
+Escolha o Asset: Erro: Essa opção não existe. Tente novamente.
+1 - Citroen C3
+Escolha o Asset: Tipo da Observação: Valor: Erro: Valor precisa ser um número válido.
+Tente novamente ou digite 'c' para cancelar.
+Valor: Unidade: Origem: Data/Hora (opcional): OK Observação registrada: 900 rpm.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORIZON LAB
+1 Cadastrar Asset
+2 Registrar Observação
+3 Ver Linha do Tempo
+4 Ver Estado Atual
+5 Sair
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Escolha uma opção: Até logo.

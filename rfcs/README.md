@@ -9,3 +9,4 @@
 - [RFC-0006: Temporal Memory Engine](RFC-0006-TEMPORAL_MEMORY_ENGINE.md) - Accepted
 - [RFC-0007: Current State Engine](RFC-0007-CURRENT_STATE_ENGINE.md) - Accepted
 - [RFC-0008: Persistence Layer](RFC-0008-PERSISTENCE_LAYER.md) - Accepted
+- [RFC-0009: Experience Layer](RFC-0009-EXPERIENCE_LAYER.md) - Accepted
