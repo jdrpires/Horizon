@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add Sprint-010 JSON persistence layer for Asset and Observation facts.
+- Rebuild Timeline and Current State from persisted Observations on Horizon Lab startup.
+- Add `horizon-storage` package with JSON adapter, serializers, repositories, and bootstrap.
 - Add permanent document governance and Living Digital Twin foundation documents.
 - Add Sprint-009 Current State Engine documentation and implementation.
 - Add in-memory Current State projection from Timeline replay.
