@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add Capability-009 Live Ingestion Gateway for local `POST /observations`.
+- Update Android OBD Bridge with configurable HTTP sink for Gateway ingestion.
 - Record Milestone M1: First Live Observation with Citroën C3, ELM327, and Android OBD Bridge.
 - Add Capability-008 Android OBD Bridge app.
 - Add Capability-007 Android/ELM327 OBD Collector Spike.

@@ -14,3 +14,4 @@
 - [RFC-0011: Collector Framework](RFC-0011-COLLECTOR_FRAMEWORK.md) - Accepted
 - [RFC-0012: Android OBD Collector](RFC-0012-ANDROID_OBD_COLLECTOR.md) - Accepted
 - [RFC-0013: Android OBD Bridge](RFC-0013-ANDROID_OBD_BRIDGE.md) - Accepted
+- [RFC-0014: Live Ingestion Gateway](RFC-0014-LIVE_INGESTION_GATEWAY.md) - Accepted

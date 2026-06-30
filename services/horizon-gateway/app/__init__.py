@@ -1,0 +1,2 @@
+"""Horizon Live Ingestion Gateway."""
+
