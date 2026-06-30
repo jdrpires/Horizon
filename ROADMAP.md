@@ -2,10 +2,11 @@
 
 ## Current
 
-- Validate the Android/ELM327 OBD Collector Spike through mock transport and documented Android boundaries.
+- Validate the Android OBD Bridge on a Realme device with paired ELM327.
 
 ## Next
 
+- Design the Horizon ingestion endpoint for Android OBD Bridge payloads.
 - Decide the approved runtime for real Android Bluetooth execution.
 - Design transport-specific collectors behind the generic Collector Framework.
 - Design the future Observation Value Model for non-numeric observations.

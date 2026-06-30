@@ -69,6 +69,7 @@ The current system starts with Asset identity, factual Observations, a catalog f
 
 ```text
 apps/
+  android-obd-bridge/          Minimal Android/ELM327 OBD bridge
   horizon-lab/                 Local interactive lab
 packages/
   horizon-application/         In-memory orchestration and use cases
@@ -184,6 +185,7 @@ Implemented:
 - Observation Catalog
 - Collector Framework
 - Android/ELM327 OBD Collector Spike
+- Android OBD Bridge
 
 Still on the roadmap:
 
@@ -192,7 +194,7 @@ Still on the roadmap:
 - Living Digital Twin
 - Knowledge Engine
 - Conversation Engine
-- Production Bluetooth Collector
+- Horizon Ingestion API
 - API
 
 ## Contribution
