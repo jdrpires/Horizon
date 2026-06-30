@@ -21,6 +21,15 @@ from horizon_domain.asset import (
     TransferOwnership,
     UpdateConfiguration,
 )
+from horizon_domain.current_state import (
+    CurrentState,
+    CurrentStateBuilder,
+    CurrentStateProjection,
+    CurrentStateQuery,
+    CurrentStateService,
+    CurrentStateSnapshot,
+    CurrentStateValue,
+)
 from horizon_domain.observation import (
     Observation,
     ObservationId,
@@ -57,6 +66,13 @@ __all__ = [
     "AssetRegistered",
     "AssetStatus",
     "AssetTransferred",
+    "CurrentState",
+    "CurrentStateBuilder",
+    "CurrentStateProjection",
+    "CurrentStateQuery",
+    "CurrentStateService",
+    "CurrentStateSnapshot",
+    "CurrentStateValue",
     "DeactivateAsset",
     "Ownership",
     "Observation",

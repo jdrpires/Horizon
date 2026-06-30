@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add permanent document governance and Living Digital Twin foundation documents.
+- Add Sprint-009 Current State Engine documentation and implementation.
+- Add in-memory Current State projection from Timeline replay.
 - Add Sprint-008 Temporal Memory Engine documentation and implementation.
 - Add in-memory Timeline query, filters, cursor navigation, and replay.
 - Rename Playground to Horizon Lab for in-memory exploration.

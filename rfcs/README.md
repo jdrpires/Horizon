@@ -7,3 +7,4 @@
 - [RFC-0004: Domain Language](RFC-0004-DOMAIN_LANGUAGE.md) - Accepted
 - [RFC-0005: Observation Domain](RFC-0005-OBSERVATION_DOMAIN.md) - Accepted
 - [RFC-0006: Temporal Memory Engine](RFC-0006-TEMPORAL_MEMORY_ENGINE.md) - Accepted
+- [RFC-0007: Current State Engine](RFC-0007-CURRENT_STATE_ENGINE.md) - Accepted

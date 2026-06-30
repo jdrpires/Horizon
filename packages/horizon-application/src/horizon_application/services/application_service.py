@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from horizon_application.commands import RegisterAssetCommand, RegisterObservationCommand
+from horizon_application.current_state import CurrentStateSnapshotDTO, GetCurrentStateQuery
+from horizon_application.current_state.handlers import GetCurrentStateQueryHandler
+from horizon_application.current_state.use_cases import GetCurrentStateUseCase
 from horizon_application.dto import (
     AssetDTO,
     ObservationDTO,
@@ -33,6 +36,7 @@ from horizon_application.timeline import (
 )
 from horizon_application.timeline.handlers import GetTimelineQueryHandler, ReplayTimelineQueryHandler
 from horizon_application.timeline.use_cases import GetTimelineUseCase, ReplayTimelineUseCase
+from horizon_domain.current_state import CurrentStateService
 from horizon_application.use_cases import RegisterAssetUseCase, RegisterObservationUseCase
 from horizon_domain.timeline import ReplayEngine
 from horizon_events import EventSubscriber, InMemoryEventBus
@@ -102,6 +106,10 @@ class ApplicationService:
         )
         get_timeline_use_case = GetTimelineUseCase(timeline_repository)
         replay_timeline_use_case = ReplayTimelineUseCase(timeline_repository, ReplayEngine())
+        get_current_state_use_case = GetCurrentStateUseCase(
+            timeline_repository=timeline_repository,
+            current_state_service=CurrentStateService(),
+        )
         command_dispatcher.register(
             RegisterAssetCommand,
             RegisterAssetCommandHandler(register_asset_use_case),
@@ -122,6 +130,10 @@ class ApplicationService:
         query_dispatcher.register(
             ReplayTimelineQuery,
             ReplayTimelineQueryHandler(replay_timeline_use_case),
+        )
+        query_dispatcher.register(
+            GetCurrentStateQuery,
+            GetCurrentStateQueryHandler(get_current_state_use_case),
         )
 
         return cls(
@@ -163,3 +175,7 @@ class ApplicationService:
     ) -> ReplayTimelineResultDTO:
         """Replay Timeline entries."""
         return self.mediator.ask(query or ReplayTimelineQuery())  # type: ignore[return-value]
+
+    def get_current_state(self, query: GetCurrentStateQuery) -> CurrentStateSnapshotDTO:
+        """Return Current State for an Asset."""
+        return self.mediator.ask(query)  # type: ignore[return-value]
