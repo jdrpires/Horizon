@@ -26,3 +26,7 @@ build/
 docker-compose.override.yml
 
 storage/*.json
+
+apps/android-obd-bridge/.gradle/
+apps/android-obd-bridge/local.properties
+apps/android-obd-bridge/app/build/

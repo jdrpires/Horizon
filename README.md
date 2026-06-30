@@ -172,6 +172,11 @@ Horizon evolves through institutional governance before implementation. Major wo
 
 Horizon is in Alpha.
 
+Milestones:
+
+- [M1: First Live Observation](milestones/M1-FIRST-LIVE-OBSERVATION.md): first physical Asset observation recorded from a Citroën C3 through ELM327 Bluetooth and the Android OBD Bridge.
+- M2: Live Ingestion is the next milestone, focused on sending Android OBD Bridge payloads through `POST /observations` into Horizon.
+
 Implemented:
 
 - Foundation
