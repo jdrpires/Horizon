@@ -24,3 +24,5 @@ build/
 .vscode/
 
 docker-compose.override.yml
+
+storage/*.json
