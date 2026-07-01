@@ -9,17 +9,6 @@ native Android Bluetooth bridge is approved.
 from __future__ import annotations
 
 import argparse
-import sys
-from pathlib import Path
-
-
-ROOT = Path(__file__).resolve().parents[1]
-for path in (
-    ROOT / "packages" / "collector-obd" / "src",
-    ROOT / "packages" / "horizon-collector" / "src",
-    ROOT / "packages" / "horizon-catalog" / "src",
-):
-    sys.path.insert(0, str(path))
 
 from collector_obd import AndroidBluetoothTransport, Elm327Adapter, MockObdTransport
 from collector_obd.android import android_pairing_steps, android_probe_limitations

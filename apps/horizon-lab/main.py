@@ -3,22 +3,11 @@
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-for source_path in (
-    ROOT / "packages" / "horizon-application" / "src",
-    ROOT / "packages" / "horizon-catalog" / "src",
-    ROOT / "packages" / "horizon-domain" / "src",
-    ROOT / "packages" / "horizon-events" / "src",
-    ROOT / "packages" / "horizon-experience" / "src",
-    ROOT / "packages" / "horizon-kernel" / "src",
-    ROOT / "packages" / "horizon-storage" / "src",
-):
-    sys.path.insert(0, str(source_path))
 
-from horizon_application import (  # noqa: E402
+from horizon_application import (
     ApplicationService,
     GetCurrentStateQuery,
     GetTimelineQuery,
@@ -26,8 +15,8 @@ from horizon_application import (  # noqa: E402
     RegisterAssetCommand,
     RegisterObservationCommand,
 )
-from horizon_catalog import ValueType, load_vehicle_catalog, validate_value  # noqa: E402
-from horizon_experience import (  # noqa: E402
+from horizon_catalog import ValueType, load_vehicle_catalog, validate_value
+from horizon_experience import (
     UserCancelled,
     choose_from_list,
     print_current_state,
@@ -36,9 +25,9 @@ from horizon_experience import (  # noqa: E402
     prompt_float,
     prompt_text,
 )
-from horizon_experience.formatters import friendly_unit, friendly_value  # noqa: E402
-from horizon_experience.rendering import error, info, section, success  # noqa: E402
-from horizon_storage import JsonStorageBootstrap  # noqa: E402
+from horizon_experience.formatters import friendly_unit, friendly_value
+from horizon_experience.rendering import error, info, section, success
+from horizon_storage import JsonStorageBootstrap
 
 
 def main() -> None:
