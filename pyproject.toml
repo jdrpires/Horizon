@@ -16,13 +16,40 @@ packages = [
   { include = "horizon_experience", from = "packages/horizon-experience/src" },
   { include = "horizon_storage", from = "packages/horizon-storage/src" },
   { include = "collector_obd", from = "packages/collector-obd/src" },
+  { include = "app", from = "services/horizon-gateway" },
   { include = "horizon_api", from = "services/api/src" },
   { include = "domain", from = "packages/kernel" },
   { include = "shared", from = "packages" }
 ]
 
+[tool.horizon.workspace]
+runtime = "editable-install"
+python = ">=3.12,<4.0"
+apps = [
+  "apps/horizon-lab",
+  "apps/horizon-mobile"
+]
+services = [
+  "services/horizon-gateway"
+]
+tools = [
+  "tools/android_obd_probe.py"
+]
+packages = [
+  "packages/horizon-kernel",
+  "packages/horizon-events",
+  "packages/horizon-protocol",
+  "packages/horizon-domain",
+  "packages/horizon-application",
+  "packages/horizon-storage",
+  "packages/horizon-experience",
+  "packages/horizon-catalog",
+  "packages/horizon-collector",
+  "packages/collector-obd"
+]
+
 [tool.poetry.dependencies]
-python = ">=3.13,<4.0"
+python = ">=3.12,<4.0"
 fastapi = "^0.115.0"
 pydantic = "^2.8.0"
 pydantic-settings = "^2.4.0"
@@ -43,11 +70,11 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 100
-target-version = ["py313"]
+target-version = ["py312"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py313"
+target-version = "py312"
 src = ["services/api/src", "services/horizon-gateway/app", "packages/horizon-events/src", "packages/horizon-kernel/src", "packages/horizon-protocol/src", "packages/horizon-domain/src", "packages/horizon-application/src", "packages/horizon-catalog/src", "packages/horizon-collector/src", "packages/collector-obd/src", "packages/horizon-experience/src", "packages/horizon-storage/src", "packages", "tests"]
 
 [tool.ruff.lint]
@@ -55,7 +82,7 @@ select = ["E", "F", "I", "B", "UP", "RUF"]
 ignore = []
 
 [tool.mypy]
-python_version = "3.13"
+python_version = "3.12"
 strict = true
 warn_unused_configs = true
 files = [
