@@ -28,5 +28,19 @@ class GatewayEndpointsTest {
         assertEquals("http://192.168.0.10:8000", endpoints.baseUrl)
         assertEquals("http://192.168.0.10:8000/observations", endpoints.observationsUrl)
     }
-}
 
+    @Test
+    fun buildsAssetQueriesUsingUuid() {
+        val endpoints = GatewayEndpoints("http://192.168.0.10:8000")
+        val assetId = "3662b190-0a62-4e76-829f-86d500d4552c"
+
+        assertEquals(
+            "http://192.168.0.10:8000/assets/$assetId/current-state",
+            endpoints.currentStateUrl(assetId),
+        )
+        assertEquals(
+            "http://192.168.0.10:8000/assets/$assetId/timeline",
+            endpoints.timelineUrl(assetId),
+        )
+    }
+}

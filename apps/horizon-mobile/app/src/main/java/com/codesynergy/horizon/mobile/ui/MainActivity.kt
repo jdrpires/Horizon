@@ -17,22 +17,23 @@ import android.widget.TextView
 import com.codesynergy.horizon.mobile.bluetooth.BluetoothDeviceItem
 import com.codesynergy.horizon.mobile.bluetooth.BluetoothDeviceProvider
 import com.codesynergy.horizon.mobile.bluetooth.BluetoothRfcommObdConnection
-import com.codesynergy.horizon.mobile.bluetooth.ObdConnection
-import com.codesynergy.horizon.mobile.elm327.Elm327Parser
-import com.codesynergy.horizon.mobile.elm327.ObdMapper
 import com.codesynergy.horizon.mobile.model.CurrentStateSnapshot
 import com.codesynergy.horizon.mobile.model.CurrentStateValue
 import com.codesynergy.horizon.mobile.model.HorizonAsset
-import com.codesynergy.horizon.mobile.model.ObdCommands
-import com.codesynergy.horizon.mobile.model.ObdObservationPayload
 import com.codesynergy.horizon.mobile.model.ObservationReading
 import com.codesynergy.horizon.mobile.model.TimelineEntry
 import com.codesynergy.horizon.mobile.network.HorizonGatewayClient
 import com.codesynergy.horizon.mobile.settings.MobileSettings
-import com.codesynergy.horizon.mobile.session.BluetoothSessionController
+import com.codesynergy.horizon.mobile.session.BluetoothSessionEngine
+import com.codesynergy.horizon.mobile.session.BluetoothSessionState
+import com.codesynergy.horizon.mobile.session.GatewayObservationPublisher
+import com.codesynergy.horizon.mobile.session.LogcatBluetoothSessionLogger
 import com.codesynergy.horizon.mobile.session.MobileSettingsDeviceStore
 import com.codesynergy.horizon.mobile.session.SelectedBluetoothDevice
 import com.codesynergy.horizon.mobile.sink.LogcatSink
+import com.codesynergy.horizon.mobile.state.AssetSelectionManager
+import com.codesynergy.horizon.mobile.state.LogcatAssetSelectionLogger
+import com.codesynergy.horizon.mobile.state.MobileSettingsAssetSelectionStore
 import java.time.Instant
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -40,7 +41,8 @@ import java.util.concurrent.Executors
 class MainActivity : Activity() {
     private lateinit var provider: BluetoothDeviceProvider
     private lateinit var settings: MobileSettings
-    private lateinit var session: BluetoothSessionController
+    private lateinit var session: BluetoothSessionEngine
+    private lateinit var assetSelection: AssetSelectionManager
     private lateinit var content: LinearLayout
     private lateinit var titleText: TextView
     private lateinit var subtitleText: TextView
@@ -68,14 +70,19 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         provider = BluetoothDeviceProvider(this)
         settings = MobileSettings(this)
-        session = BluetoothSessionController(
+        assetSelection = AssetSelectionManager(
+            store = MobileSettingsAssetSelectionStore(settings),
+            logger = LogcatAssetSelectionLogger,
+        )
+        assetSelection.restore()
+        session = BluetoothSessionEngine(
             store = MobileSettingsDeviceStore(settings),
             connectionFactory = { selected ->
                 provider.deviceByAddress(selected.address, selected.name)?.let { device ->
                     BluetoothRfcommObdConnection(device.device)
                 }
             },
-            initializer = ::initializeElm327,
+            logger = LogcatBluetoothSessionLogger,
         )
         setContentView(createLayout())
         requestBluetoothPermissionIfNeeded()
@@ -85,7 +92,7 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         readingActive = false
         executor.shutdownNow()
-        session.stop()
+        session.disconnect()
         super.onDestroy()
     }
 
@@ -143,7 +150,8 @@ class MainActivity : Activity() {
     }
 
     private fun renderHome() {
-        val assetName = selectedAsset?.name ?: settings.assetReference.ifBlank { "Asset não selecionado" }
+        val selected = assetSelection.current
+        val assetName = selectedAsset?.name ?: selected?.displayName ?: "Asset não selecionado"
         val state = currentState
         section("Home")
         content.addView(text(assetName, 22f))
@@ -158,21 +166,27 @@ class MainActivity : Activity() {
 
     private fun renderAssets() {
         section("Assets")
+        val assetItems = assets.ifEmpty {
+            listOf(HorizonAsset("", "Nenhum Asset carregado", null, "", ""))
+        }
         val assetSpinner = Spinner(this)
         assetSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
-            assets.ifEmpty {
-                listOf(HorizonAsset("", "Nenhum Asset carregado", null, "", ""))
-            },
+            assetItems,
         )
+        val selectedAssetId = assetSelection.current?.assetId
+        val selectedIndex = assetItems.indexOfFirst { it.assetId == selectedAssetId }
+        if (selectedIndex >= 0) {
+            assetSpinner.setSelection(selectedIndex)
+        }
         content.addView(assetSpinner)
         content.addView(primaryButton("Buscar Assets no Horizon") { fetchAssets() })
         content.addView(primaryButton("Usar Asset selecionado") {
             val item = assetSpinner.selectedItem as? HorizonAsset
             if (item != null && item.assetId.isNotBlank()) {
                 selectedAsset = item
-                settings.assetReference = item.externalReference ?: item.assetId
+                assetSelection.select(item)
                 status("Asset selecionado: ${item.name}")
                 show(Screen.HOME)
             } else {
@@ -241,6 +255,8 @@ class MainActivity : Activity() {
         content.addView(line("Estado Bluetooth", session.state.name))
         content.addView(line("Horizon", horizonStatus))
         content.addView(line("Última leitura", lastSync ?: "--"))
+        content.addView(line("Último comando", session.lastCommand ?: "--"))
+        content.addView(line("Última resposta", session.lastResponse ?: "--"))
         content.addView(line("Tentativas de reconexão", session.reconnectAttempts.toString()))
         content.addView(line("Erro", session.lastError ?: "--"))
         content.addView(line("Pacotes enviados", sentPackets.toString()))
@@ -260,6 +276,7 @@ class MainActivity : Activity() {
         content.addView(primaryButton("Conectar") { connectSelectedDevice() })
         content.addView(primaryButton("Iniciar leitura") { startReading() })
         content.addView(primaryButton("Parar leitura") { stopReading() })
+        content.addView(primaryButton("Desconectar") { disconnectBluetooth() })
         content.addView(primaryButton("Trocar dispositivo") { changeDevice() })
         content.addView(primaryButton("Testar Horizon") { testHorizonConnection() })
     }
@@ -272,9 +289,10 @@ class MainActivity : Activity() {
             setText(settings.gatewayUrl)
         }
         val assetInput = EditText(this).apply {
-            hint = "Asset ID ou referência externa"
+            hint = "Asset selecionado"
             setSingleLine(true)
-            setText(settings.assetReference)
+            setText(assetSelection.current?.assetId.orEmpty())
+            isEnabled = false
         }
         val frequencySpinner = Spinner(this).apply {
             adapter = ArrayAdapter(
@@ -294,7 +312,6 @@ class MainActivity : Activity() {
         content.addView(frequencySpinner)
         content.addView(primaryButton("Salvar ajustes") {
             settings.gatewayUrl = gatewayInput.text.toString()
-            settings.assetReference = assetInput.text.toString()
             settings.readFrequencyHz = when (frequencySpinner.selectedItemPosition) {
                 1 -> 2
                 2 -> 5
@@ -372,39 +389,62 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun initializeElm327(obdConnection: ObdConnection) {
-        ObdCommands.initialization.forEach { command ->
-            obdConnection.send(command)
-            Thread.sleep(150)
-        }
-    }
-
     private fun startReading() {
-        if (!session.startReading()) {
-            status(session.lastError ?: "Conecte o Bluetooth antes de acompanhar o Asset")
-            refreshScreen()
+        if (readingActive) {
+            status("Leitura já está em andamento")
             return
         }
-        readingActive = true
-        status("Acompanhando o Asset")
-        scheduleReading()
+        if (assetSelection.current?.assetId.isNullOrBlank()) {
+            status("Selecione um Asset antes de iniciar a coleta.")
+            show(Screen.ASSETS)
+            return
+        }
+        bluetoothStatus = "Iniciando leitura"
         refreshScreen()
+        executor.execute {
+            if (!session.startReading()) {
+                readingActive = false
+                status(session.lastError ?: "Conecte o Bluetooth antes de acompanhar o Asset")
+                refreshScreen()
+                return@execute
+            }
+            readingActive = true
+            status("Acompanhando o Asset")
+            mainHandler.post { scheduleReading() }
+            refreshScreen()
+        }
     }
 
     private fun stopReading() {
         readingActive = false
-        session.pauseReading()
         status("Leitura pausada")
         refreshScreen()
+        executor.execute {
+            session.stopReading()
+            refreshScreen()
+        }
+    }
+
+    private fun disconnectBluetooth() {
+        readingActive = false
+        bluetoothStatus = "Desconectado"
+        status("Bluetooth desconectado")
+        refreshScreen()
+        executor.execute {
+            session.disconnect()
+            refreshScreen()
+        }
     }
 
     private fun changeDevice() {
         readingActive = false
-        session.clearSelection()
         devices = emptyList()
         bluetoothStatus = "Seleção de Bluetooth removida"
         status("Liste os dispositivos para selecionar outro ELM327")
-        show(Screen.CONNECTION)
+        executor.execute {
+            session.clearSelection()
+            showOnMain(Screen.CONNECTION)
+        }
     }
 
     private fun scheduleReading() {
@@ -417,56 +457,50 @@ class MainActivity : Activity() {
     }
 
     private fun readOnce() {
-        val assetReference = settings.assetReference.ifBlank {
-            selectedAsset?.externalReference ?: selectedAsset?.assetId.orEmpty()
-        }
-        if (assetReference.isBlank()) {
-            status("Selecione um Asset antes de acompanhar")
+        val assetId = runCatching {
+            assetSelection.requireAssetId()
+        }.getOrElse { error ->
+            status(error.message ?: "Selecione um Asset antes de iniciar a coleta.")
+            showOnMain(Screen.ASSETS)
             return
         }
         executor.execute {
-            val readings = session.withConnection { obdConnection ->
-                val timestamp = Instant.now()
-                ObdCommands.pids.map { command ->
-                    val raw = obdConnection.send(command)
-                    val value = Elm327Parser.parse(command, raw)
-                    ObdMapper.toObservation(command, value, timestamp)
-                }
+            val result = runCatching {
+                session.readAndPublish(
+                    assetReference = assetId,
+                    publisher = GatewayObservationPublisher(
+                        gatewayUrl = settings.gatewayUrl,
+                        logcatSink = logcatSink,
+                        logger = LogcatBluetoothSessionLogger,
+                    ),
+                )
+            }.getOrElse { error ->
+                horizonStatus = "Falha na sincronização"
+                status("Não foi possível enviar a leitura: ${error.message}")
+                refreshScreen()
+                return@execute
             }
-            if (readings == null) {
+            if (result == null) {
                 bluetoothStatus = "Reconectando ${session.selectedDevice.displayName}"
                 status(session.lastError ?: "Falha de leitura; tentando reconectar")
                 refreshScreen()
                 return@execute
             }
-            runCatching {
-                val payload = ObdObservationPayload(
-                    assetId = assetReference,
-                    observations = readings,
-                )
-                logcatSink.emit(payload)
-                val startedAt = System.currentTimeMillis()
-                HorizonGatewayClient(settings.gatewayUrl).send(payload)
-                lastLatencyMs = System.currentTimeMillis() - startedAt
-                sentPackets += 1
-                readings
-            }.onSuccess { readings ->
-                status("Leitura enviada ao Horizon")
-                syncAfterSend(assetReference, readings)
-            }.onFailure { error ->
-                horizonStatus = "Falha na sincronização"
-                status("Não foi possível enviar a leitura: ${error.message}")
-                refreshScreen()
-            }
+            lastLatencyMs = result.latencyMs
+            sentPackets += 1
+            status("Leitura enviada ao Horizon")
+            syncAfterSend(assetId, result.readings)
         }
     }
 
-    private fun syncAfterSend(assetReference: String, readings: List<ObservationReading>) {
+    private fun syncAfterSend(assetId: String, readings: List<ObservationReading>) {
         executor.execute {
             runCatching {
                 val client = HorizonGatewayClient(settings.gatewayUrl)
-                currentState = client.getCurrentState(assetReference)
-                timeline = client.getTimeline(assetReference)
+                LogcatBluetoothSessionLogger.log("[Gateway] GET current-state asset_id=$assetId")
+                currentState = client.getCurrentState(assetId)
+                LogcatBluetoothSessionLogger.log("[Gateway] GET timeline asset_id=$assetId")
+                timeline = client.getTimeline(assetId)
                 receivedPackets += 2
                 lastSync = readings.firstOrNull()?.timestamp ?: Instant.now().toString()
                 horizonStatus = "Conectado ao Horizon"
@@ -485,10 +519,10 @@ class MainActivity : Activity() {
             runCatching {
                 val result = HorizonGatewayClient(settings.gatewayUrl).listAssets()
                 assets = result
+                val restored = assetSelection.current
                 selectedAsset = result.firstOrNull {
-                    it.assetId == settings.assetReference || it.externalReference == settings.assetReference
-                } ?: result.firstOrNull()
-                selectedAsset?.let { settings.assetReference = it.externalReference ?: it.assetId }
+                    it.assetId == restored?.assetId || it.externalReference == restored?.externalReference
+                }
                 receivedPackets += 1
                 horizonStatus = "Conectado ao Horizon"
             }.onSuccess {
@@ -503,16 +537,20 @@ class MainActivity : Activity() {
     }
 
     private fun syncFromHorizon() {
-        val assetReference = settings.assetReference
-        if (assetReference.isBlank()) {
-            status("Informe um Asset nos ajustes")
+        val assetId = runCatching {
+            assetSelection.requireAssetId()
+        }.getOrElse { error ->
+            status(error.message ?: "Selecione um Asset antes de iniciar a coleta.")
+            showOnMain(Screen.ASSETS)
             return
         }
         executor.execute {
             runCatching {
                 val client = HorizonGatewayClient(settings.gatewayUrl)
-                currentState = client.getCurrentState(assetReference)
-                timeline = client.getTimeline(assetReference)
+                LogcatBluetoothSessionLogger.log("[Gateway] GET current-state asset_id=$assetId")
+                currentState = client.getCurrentState(assetId)
+                LogcatBluetoothSessionLogger.log("[Gateway] GET timeline asset_id=$assetId")
+                timeline = client.getTimeline(assetId)
                 receivedPackets += 2
                 lastSync = currentState?.lastUpdatedAt ?: Instant.now().toString()
                 horizonStatus = "Conectado ao Horizon"
@@ -528,14 +566,17 @@ class MainActivity : Activity() {
     }
 
     private fun syncTimeline() {
-        val assetReference = settings.assetReference
-        if (assetReference.isBlank()) {
-            status("Informe um Asset nos ajustes")
+        val assetId = runCatching {
+            assetSelection.requireAssetId()
+        }.getOrElse { error ->
+            status(error.message ?: "Selecione um Asset antes de iniciar a coleta.")
+            showOnMain(Screen.ASSETS)
             return
         }
         executor.execute {
             runCatching {
-                timeline = HorizonGatewayClient(settings.gatewayUrl).getTimeline(assetReference)
+                LogcatBluetoothSessionLogger.log("[Gateway] GET timeline asset_id=$assetId")
+                timeline = HorizonGatewayClient(settings.gatewayUrl).getTimeline(assetId)
                 receivedPackets += 1
                 lastSync = Instant.now().toString()
                 horizonStatus = "Conectado ao Horizon"
@@ -607,8 +648,8 @@ class MainActivity : Activity() {
 
     private fun connectionQuality(): String =
         when {
-            session.state.name == "READING" && horizonStatus == "Conectado ao Horizon" -> "Boa"
-            session.state.name == "CONNECTED" || session.state.name == "READING" -> "Bluetooth conectado"
+            session.state == BluetoothSessionState.READING && horizonStatus == "Conectado ao Horizon" -> "Boa"
+            session.state == BluetoothSessionState.CONNECTED || session.state == BluetoothSessionState.READING -> "Bluetooth conectado"
             horizonStatus == "Conectado ao Horizon" -> "Horizon conectado"
             else -> "Aguardando conexão"
         }
