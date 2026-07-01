@@ -38,6 +38,25 @@ The UX now treats ELM327 selection as an explicit setup action:
 
 The user can change devices only through `Trocar dispositivo`, which clears the persisted Bluetooth selection and asks for a new explicit selection.
 
+## Bluetooth Session Engine Follow-up
+
+Capability-012 promotes the sticky MAC selection decision into a dedicated Bluetooth Session Engine.
+
+The connection screen now exposes operational diagnostics without turning Horizon Mobile into an OBD scanner:
+
+- selected device;
+- MAC address;
+- session state;
+- last command;
+- last response;
+- last error;
+- reconnect attempts;
+- packets sent and received;
+- last reading;
+- approximate latency.
+
+These details support field testing while preserving the primary UX goal: the user follows the Asset state, not raw PIDs.
+
 ## Rejected Directions
 
 - No gauges.

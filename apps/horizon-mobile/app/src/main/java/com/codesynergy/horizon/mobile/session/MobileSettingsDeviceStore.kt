@@ -4,7 +4,7 @@ import com.codesynergy.horizon.mobile.settings.MobileSettings
 
 class MobileSettingsDeviceStore(
     private val settings: MobileSettings,
-) : BluetoothSessionController.SelectedDeviceStore {
+) : BluetoothSessionEngine.SelectedDeviceStore {
     override fun selectedDevice(): SelectedBluetoothDevice =
         SelectedBluetoothDevice(
             name = settings.bluetoothDeviceName,
