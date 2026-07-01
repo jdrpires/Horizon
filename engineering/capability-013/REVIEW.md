@@ -13,18 +13,23 @@ No functional code outside Horizon Mobile was changed.
 
 ## Architecture Review
 
-`AssetSelectionManager` becomes the single owner of the selected Asset in the mobile application.
+`SessionState` becomes the screen-facing state model, while `AssetSelectionManager` remains the owner of persisted Asset identity.
 
 ```mermaid
 flowchart TD
     UI["MainActivity"]
+    State["SessionState"]
     Selection["AssetSelectionManager"]
+    Binder["AssetAutoBinder"]
     Store["MobileSettingsAssetSelectionStore"]
     Gateway["HorizonGatewayClient"]
     Session["BluetoothSessionEngine"]
     Publisher["ObservationPublisher"]
 
+    UI --> State
     UI --> Selection
+    UI --> Binder
+    Binder --> Selection
     Selection --> Store
     UI --> Gateway
     UI --> Session
@@ -44,13 +49,18 @@ The Gateway remains unchanged. Horizon Core remains unchanged. Bluetooth session
 - Asset persistence.
 - Asset restoration.
 - Asset switching.
+- SessionState initial state.
+- Auto-selection with exactly one Asset.
+- No auto-selection with multiple Assets.
 - Blocking without selected Asset.
 - POST payload uses UUID.
 - Current State URL uses UUID.
 - Timeline URL uses UUID.
+- Gateway 422 body/message exposure.
 
 ## Risks
 
 - Existing installations with only the legacy `assetReference` field will need the user to select an Asset once.
 - If Gateway returns assets without UUIDs, Horizon Mobile blocks selection.
 - Horizon Mobile still has no multi-Asset background sync.
+- Startup health check is best-effort and depends on the configured Gateway URL.

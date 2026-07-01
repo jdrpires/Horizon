@@ -88,7 +88,7 @@ class HorizonGatewayClient(
             val status = connection.responseCode
             val response = readResponse(connection)
             if (status !in 200..299) {
-                throw IllegalStateException("Horizon recusou a leitura: HTTP $status $response")
+                throw GatewayResponseException(status, response)
             }
             return response
         } finally {
@@ -102,7 +102,7 @@ class HorizonGatewayClient(
             val status = connection.responseCode
             val response = readResponse(connection)
             if (status !in 200..299) {
-                throw IllegalStateException("Horizon não respondeu à consulta: HTTP $status $response")
+                throw GatewayResponseException(status, response)
             }
             return response
         } finally {
@@ -127,3 +127,20 @@ class HorizonGatewayClient(
     }
 }
 
+class GatewayResponseException(
+    val statusCode: Int,
+    val responseBody: String,
+) : IllegalStateException(GatewayErrorMessage.friendly(statusCode, responseBody))
+
+object GatewayErrorMessage {
+    fun friendly(statusCode: Int, body: String): String {
+        val reason = when {
+            statusCode == 422 && body.contains("asset", ignoreCase = true) -> "Asset inexistente ou inválido."
+            statusCode == 422 && body.contains("definition", ignoreCase = true) -> "Definition inválida."
+            statusCode == 422 && body.contains("required", ignoreCase = true) -> "Campo obrigatório ausente."
+            statusCode == 422 -> "Payload inválido."
+            else -> "Horizon retornou HTTP $statusCode."
+        }
+        return "$reason $body".trim()
+    }
+}
