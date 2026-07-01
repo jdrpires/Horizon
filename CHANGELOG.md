@@ -26,3 +26,16 @@
 - Add Sprint-007 Observation vertical slice.
 - Add Observation domain documentation, aggregate, application flow, and playground support.
 - Add in-memory Observation registration, listing, domain event publication, and EventEnvelope display.
+
+## Alpha 1.1
+
+First End-to-End Live Vehicle Telemetry.
+
+- Validate Android Horizon Mobile on real hardware.
+- Validate Bluetooth ELM327 live vehicle telemetry.
+- Validate Live Gateway ingestion.
+- Validate Observation Pipeline from mobile client to Horizon memory.
+- Validate Timeline updates from live observations.
+- Validate Current State projection from live observations.
+- Complete Mobile State Synchronization for reliable Asset UUID binding.
+- Complete Bluetooth Session Engine for stable ELM327 sessions.

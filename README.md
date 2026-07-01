@@ -171,36 +171,62 @@ Horizon evolves through institutional governance before implementation. Major wo
 
 ## Release Status
 
-Current release: **Alpha 1.0**.
+Current release: **Alpha 1.1**.
 
 Alpha 1.0 stabilizes the first generation of Horizon architecture. It includes the foundation, Asset and Observation memory path, Timeline, Current State, Storage, Observation Catalog, Collector Framework, Live Ingestion Gateway, and Horizon Mobile.
 
-The first real vehicle integration has been completed through the Citroen C3 field test recorded as [M1: First Live Observation](milestones/M1-FIRST-LIVE-OBSERVATION.md).
+The first real vehicle integration has been completed through the Citroën C3 field test recorded as [M1: First Live Observation](milestones/M1-FIRST-LIVE-OBSERVATION.md).
+
+Alpha 1.1 records [M2: First End-to-End Live Vehicle Telemetry](milestones/M2-FIRST-LIVE-VEHICLE-TELEMETRY.md). Horizon was validated on real hardware through Horizon Mobile, ELM327 Bluetooth, Cloudflare Tunnel, the Horizon Gateway, the Collector Framework, Timeline, and Current State.
 
 Release documentation:
 
 - [Alpha 1.0](releases/alpha/ALPHA-1.0.md)
+- [M2 Release](releases/alpha/M2_RELEASE.md)
+- [Alpha 1.1 Summary](docs/releases/ALPHA_1_1_SUMMARY.md)
+- [Alpha Certification](docs/releases/ALPHA_CERTIFICATION.md)
 - [Release Notes](releases/alpha/RELEASE_NOTES.md)
 - [Architecture Summary](releases/alpha/ARCHITECTURE_SUMMARY.md)
 - [Capability Matrix](releases/alpha/CAPABILITY_MATRIX.md)
 - [Known Limitations](releases/alpha/KNOWN_LIMITATIONS.md)
 - [Next Generation](releases/alpha/NEXT_GENERATION.md)
 
+## Verified on Real Hardware
+
+Alpha 1.1 has been verified with:
+
+- ✔ Citroën C3 Feel 1.6 AT
+- ✔ Android Realme
+- ✔ ELM327 Bluetooth
+- ✔ Live Gateway
+- ✔ Cloudflare Tunnel
+- ✔ Observation Pipeline
+- ✔ Timeline
+- ✔ Current State
+
 ## Project Timeline
 
 ```text
 Foundation
   ↓
-Collector
+Collector Framework
+  ↓
+Android OBD Bridge
   ↓
 Gateway
   ↓
+Live Ingestion
+  ↓
 Horizon Mobile
   ↓
-Alpha 1.0
+Bluetooth Session Engine
+  ↓
+Mobile State Synchronization
+  ↓
+M2 — First Live Vehicle Telemetry
 ```
 
-The current roadmap is maintained in [docs/roadmap/ROADMAP.md](docs/roadmap/ROADMAP.md).
+The current roadmap is maintained in [docs/roadmap/ROADMAP.md](docs/roadmap/ROADMAP.md). The historical project timeline is maintained in [docs/history/PROJECT_TIMELINE.md](docs/history/PROJECT_TIMELINE.md).
 
 ## Current Project Status
 
@@ -209,7 +235,7 @@ Horizon is in Alpha.
 Milestones:
 
 - [M1: First Live Observation](milestones/M1-FIRST-LIVE-OBSERVATION.md): first physical Asset observation recorded from a Citroën C3 through ELM327 Bluetooth and the Android OBD Bridge.
-- M2: Live Ingestion adds local `POST /observations` ingestion from Horizon Mobile into Horizon.
+- [M2: First End-to-End Live Vehicle Telemetry](milestones/M2-FIRST-LIVE-VEHICLE-TELEMETRY.md): continuous live vehicle telemetry from a Citroën C3 through Horizon Mobile, Cloudflare Tunnel, Gateway, Collector Framework, Timeline, and Current State.
 
 Implemented:
 
@@ -226,6 +252,9 @@ Implemented:
 - Android/ELM327 OBD Collector Spike
 - Horizon Mobile
 - Live Ingestion Gateway
+- Bluetooth Session Engine
+- Mobile State Synchronization
+- First End-to-End Live Vehicle Telemetry
 
 Still on the roadmap:
 
