@@ -3,6 +3,7 @@ package com.codesynergy.horizon.mobile.bluetooth
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -30,5 +31,19 @@ class BluetoothDeviceProvider(
                 )
             }
             .sortedBy { it.toString() }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun deviceByAddress(address: String, fallbackName: String = ""): BluetoothDeviceItem? {
+        if (!hasConnectPermission()) return null
+        val bluetoothAdapter = adapter ?: return null
+        val cleanAddress = address.trim()
+        if (!BluetoothAdapter.checkBluetoothAddress(cleanAddress)) return null
+        val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(cleanAddress)
+        return BluetoothDeviceItem(
+            name = device.name ?: fallbackName,
+            address = device.address,
+            device = device,
+        )
     }
 }

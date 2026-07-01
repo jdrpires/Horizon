@@ -29,6 +29,9 @@ import com.codesynergy.horizon.mobile.model.ObservationReading
 import com.codesynergy.horizon.mobile.model.TimelineEntry
 import com.codesynergy.horizon.mobile.network.HorizonGatewayClient
 import com.codesynergy.horizon.mobile.settings.MobileSettings
+import com.codesynergy.horizon.mobile.session.BluetoothSessionController
+import com.codesynergy.horizon.mobile.session.MobileSettingsDeviceStore
+import com.codesynergy.horizon.mobile.session.SelectedBluetoothDevice
 import com.codesynergy.horizon.mobile.sink.LogcatSink
 import java.time.Instant
 import java.util.concurrent.ExecutorService
@@ -37,6 +40,7 @@ import java.util.concurrent.Executors
 class MainActivity : Activity() {
     private lateinit var provider: BluetoothDeviceProvider
     private lateinit var settings: MobileSettings
+    private lateinit var session: BluetoothSessionController
     private lateinit var content: LinearLayout
     private lateinit var titleText: TextView
     private lateinit var subtitleText: TextView
@@ -51,7 +55,6 @@ class MainActivity : Activity() {
     private var selectedAsset: HorizonAsset? = null
     private var currentState: CurrentStateSnapshot? = null
     private var timeline: List<TimelineEntry> = emptyList()
-    private var connection: ObdConnection? = null
     private var activeScreen = Screen.HOME
     private var readingActive = false
     private var sentPackets = 0
@@ -65,16 +68,24 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         provider = BluetoothDeviceProvider(this)
         settings = MobileSettings(this)
+        session = BluetoothSessionController(
+            store = MobileSettingsDeviceStore(settings),
+            connectionFactory = { selected ->
+                provider.deviceByAddress(selected.address, selected.name)?.let { device ->
+                    BluetoothRfcommObdConnection(device.device)
+                }
+            },
+            initializer = ::initializeElm327,
+        )
         setContentView(createLayout())
         requestBluetoothPermissionIfNeeded()
-        refreshDevices()
         show(Screen.HOME)
     }
 
     override fun onDestroy() {
         readingActive = false
         executor.shutdownNow()
-        runCatching { connection?.close() }
+        session.stop()
         super.onDestroy()
     }
 
@@ -140,9 +151,8 @@ class MainActivity : Activity() {
         content.addView(line("Última atualização", state?.lastUpdatedAt ?: "--"))
         content.addView(line("Conexão", connectionQuality()))
         content.addView(primaryButton("Conectar") { connectSelectedDevice() })
-        content.addView(primaryButton(if (readingActive) "Parar acompanhamento" else "Acompanhar agora") {
-            toggleReading()
-        })
+        content.addView(primaryButton("Iniciar leitura") { startReading() })
+        content.addView(primaryButton("Parar leitura") { stopReading() })
         content.addView(primaryButton("Atualizar estado") { syncFromHorizon() })
     }
 
@@ -225,9 +235,14 @@ class MainActivity : Activity() {
 
     private fun renderConnection() {
         section("Conexão")
-        content.addView(line("Bluetooth", bluetoothStatus))
+        val selected = session.selectedDevice
+        content.addView(line("Dispositivo selecionado", selected.displayName))
+        content.addView(line("MAC address", selected.address.ifBlank { "--" }))
+        content.addView(line("Estado Bluetooth", session.state.name))
         content.addView(line("Horizon", horizonStatus))
-        content.addView(line("Última sincronização", lastSync ?: "--"))
+        content.addView(line("Última leitura", lastSync ?: "--"))
+        content.addView(line("Tentativas de reconexão", session.reconnectAttempts.toString()))
+        content.addView(line("Erro", session.lastError ?: "--"))
         content.addView(line("Pacotes enviados", sentPackets.toString()))
         content.addView(line("Pacotes recebidos", receivedPackets.toString()))
         content.addView(line("Latência", lastLatencyMs?.let { "$it ms" } ?: "--"))
@@ -241,7 +256,11 @@ class MainActivity : Activity() {
         } else {
             content.addView(deviceSelector())
         }
-        content.addView(primaryButton("Conectar Bluetooth") { connectSelectedDevice() })
+        content.addView(primaryButton("Selecionar dispositivo") { selectDeviceFromList() })
+        content.addView(primaryButton("Conectar") { connectSelectedDevice() })
+        content.addView(primaryButton("Iniciar leitura") { startReading() })
+        content.addView(primaryButton("Parar leitura") { stopReading() })
+        content.addView(primaryButton("Trocar dispositivo") { changeDevice() })
         content.addView(primaryButton("Testar Horizon") { testHorizonConnection() })
     }
 
@@ -294,6 +313,11 @@ class MainActivity : Activity() {
                 android.R.layout.simple_spinner_dropdown_item,
                 devices,
             )
+            val selectedAddress = session.selectedDevice.address
+            val selectedIndex = devices.indexOfFirst { it.address == selectedAddress }
+            if (selectedIndex >= 0) {
+                setSelection(selectedIndex)
+            }
         }
 
     private fun requestBluetoothPermissionIfNeeded() {
@@ -304,30 +328,40 @@ class MainActivity : Activity() {
 
     private fun refreshDevices() {
         devices = provider.pairedDevices()
-        bluetoothStatus = if (devices.isEmpty()) {
-            "Nenhum dispositivo pareado"
-        } else {
-            "Dispositivo pareado disponível"
+        bluetoothStatus = if (devices.isEmpty()) "Nenhum dispositivo pareado" else "Lista atualizada"
+    }
+
+    private fun selectDeviceFromList() {
+        val selected = devices.getOrNull(deviceSpinner?.selectedItemPosition ?: -1)
+        if (selected == null) {
+            status("Liste e selecione um dispositivo pareado")
+            return
         }
+        session.select(
+            SelectedBluetoothDevice(
+                name = selected.name,
+                address = selected.address,
+            )
+        )
+        bluetoothStatus = "Selecionado: ${selected.name.ifBlank { selected.address }}"
+        status("Dispositivo selecionado")
+        show(Screen.CONNECTION)
     }
 
     private fun connectSelectedDevice() {
-        val selected = devices.getOrNull(deviceSpinner?.selectedItemPosition ?: 0)
-        if (selected == null) {
+        val selected = session.selectedDevice
+        if (!selected.hasAddress) {
             bluetoothStatus = "Selecione um dispositivo pareado"
             show(Screen.CONNECTION)
             return
         }
-        bluetoothStatus = "Conectando ${selected.name.ifBlank { selected.address }}"
+        bluetoothStatus = "Conectando ${selected.displayName}"
         show(Screen.CONNECTION)
         executor.execute {
             runCatching {
-                val socketConnection = BluetoothRfcommObdConnection(selected.device)
-                socketConnection.connect()
-                initializeElm327(socketConnection)
-                connection = socketConnection
+                check(session.connect()) { session.lastError ?: "Falha ao conectar" }
             }.onSuccess {
-                bluetoothStatus = "Conectado"
+                bluetoothStatus = "Conectado a ${selected.displayName}"
                 status("Bluetooth conectado")
                 refreshScreen()
             }.onFailure { error ->
@@ -345,21 +379,32 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun toggleReading() {
-        if (readingActive) {
-            readingActive = false
-            status("Acompanhamento pausado")
+    private fun startReading() {
+        if (!session.startReading()) {
+            status(session.lastError ?: "Conecte o Bluetooth antes de acompanhar o Asset")
             refreshScreen()
-            return
-        }
-        if (connection == null) {
-            status("Conecte o Bluetooth antes de acompanhar o Asset")
             return
         }
         readingActive = true
         status("Acompanhando o Asset")
         scheduleReading()
         refreshScreen()
+    }
+
+    private fun stopReading() {
+        readingActive = false
+        session.pauseReading()
+        status("Leitura pausada")
+        refreshScreen()
+    }
+
+    private fun changeDevice() {
+        readingActive = false
+        session.clearSelection()
+        devices = emptyList()
+        bluetoothStatus = "Seleção de Bluetooth removida"
+        status("Liste os dispositivos para selecionar outro ELM327")
+        show(Screen.CONNECTION)
     }
 
     private fun scheduleReading() {
@@ -372,7 +417,6 @@ class MainActivity : Activity() {
     }
 
     private fun readOnce() {
-        val obdConnection = connection ?: return
         val assetReference = settings.assetReference.ifBlank {
             selectedAsset?.externalReference ?: selectedAsset?.assetId.orEmpty()
         }
@@ -381,13 +425,21 @@ class MainActivity : Activity() {
             return
         }
         executor.execute {
-            runCatching {
+            val readings = session.withConnection { obdConnection ->
                 val timestamp = Instant.now()
-                val readings = ObdCommands.pids.map { command ->
+                ObdCommands.pids.map { command ->
                     val raw = obdConnection.send(command)
                     val value = Elm327Parser.parse(command, raw)
                     ObdMapper.toObservation(command, value, timestamp)
                 }
+            }
+            if (readings == null) {
+                bluetoothStatus = "Reconectando ${session.selectedDevice.displayName}"
+                status(session.lastError ?: "Falha de leitura; tentando reconectar")
+                refreshScreen()
+                return@execute
+            }
+            runCatching {
                 val payload = ObdObservationPayload(
                     assetId = assetReference,
                     observations = readings,
@@ -555,8 +607,8 @@ class MainActivity : Activity() {
 
     private fun connectionQuality(): String =
         when {
-            bluetoothStatus == "Conectado" && horizonStatus == "Conectado ao Horizon" -> "Boa"
-            bluetoothStatus == "Conectado" -> "Bluetooth conectado"
+            session.state.name == "READING" && horizonStatus == "Conectado ao Horizon" -> "Boa"
+            session.state.name == "CONNECTED" || session.state.name == "READING" -> "Bluetooth conectado"
             horizonStatus == "Conectado ao Horizon" -> "Horizon conectado"
             else -> "Aguardando conexão"
         }
