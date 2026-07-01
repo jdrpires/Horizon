@@ -2,6 +2,7 @@ package com.codesynergy.horizon.mobile.session
 
 import com.codesynergy.horizon.mobile.model.ObdObservationPayload
 import com.codesynergy.horizon.mobile.model.ObservationReading
+import com.codesynergy.horizon.mobile.network.GatewayResponseException
 import com.codesynergy.horizon.mobile.network.HorizonGatewayClient
 import com.codesynergy.horizon.mobile.sink.ObdObservationSink
 
@@ -52,6 +53,9 @@ class GatewayObservationPublisher(
         runCatching {
             HorizonGatewayClient(gatewayUrl).send(payload)
         }.onFailure { error ->
+            if (error is GatewayResponseException && error.statusCode == 422) {
+                logger.log("[Gateway] 422 body=${error.responseBody}")
+            }
             logger.log("[Gateway] response error ${error.message}")
             throw error
         }

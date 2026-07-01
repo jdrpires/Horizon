@@ -14,6 +14,7 @@ class AssetSelectionManager(
         current?.let { asset ->
             logger.log("[Asset] Asset restored ${asset.name}")
             logger.log("[Asset] Asset UUID ${asset.assetId}")
+            logger.log("[Asset] Selected asset_id=${asset.assetId}")
         }
         return current
     }
@@ -30,6 +31,7 @@ class AssetSelectionManager(
         store.save(selected)
         logger.log("[Asset] Asset selected ${selected.name}")
         logger.log("[Asset] Asset UUID ${selected.assetId}")
+        logger.log("[Asset] Selected asset_id=${selected.assetId}")
         if (previous != null && previous.assetId != selected.assetId) {
             logger.log("[Asset] Asset changed ${previous.assetId} -> ${selected.assetId}")
         }

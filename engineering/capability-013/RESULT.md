@@ -13,6 +13,8 @@ No Horizon Core, Gateway, Domain, Application, Storage, Collector Framework, Obs
 ## Implemented
 
 - `AssetSelectionManager`
+- `SessionState`
+- `AssetAutoBinder`
 - `MobileSettingsAssetSelectionStore`
 - `LogcatAssetSelectionLogger`
 - Local persistence for:
@@ -20,11 +22,15 @@ No Horizon Core, Gateway, Domain, Application, Storage, Collector Framework, Obs
   - `name`
   - `external_reference`
 - Startup restoration of the last selected Asset.
+- Auto-selection when Gateway returns exactly one Asset.
 - Read blocking when no Asset UUID exists.
+- Read blocking when Gateway URL is missing.
+- Read blocking when Bluetooth/ELM327 is not connected.
 - Current State queries use the selected Asset UUID.
 - Timeline queries use the selected Asset UUID.
 - Observation publication uses the selected Asset UUID.
 - Gateway 422 errors surface the Gateway response message.
+- Connection screen diagnostic panel for Bluetooth, ELM327, Gateway, Asset, Current State, Timeline, and Publisher.
 - Logcat records Asset and Gateway operations.
 
 ## Validation
